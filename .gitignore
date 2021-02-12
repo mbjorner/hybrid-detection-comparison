@@ -1,5 +1,7 @@
 ## This project
 data/*
+*.in
+*.tre
 
 # Compiled source #
 ###################
