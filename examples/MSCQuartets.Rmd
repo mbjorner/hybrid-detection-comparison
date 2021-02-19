@@ -1,0 +1,73 @@
+---
+title: "MSCquartets"
+output: html_notebook
+---
+
+This is an exploration of [MSCquartets](https://cran.r-project.org/web/packages/MSCquartets/MSCquartets.pdf).
+
+The goal of this R notebook is to:
+1. determine what functions given by the MSCquartets package are relevant
+2. how to interpret them
+3. determine their input/output
+
+startup: import libraries
+```{r}
+library(MSCquartets)
+library(ape)
+```
+
+data input: collection of gene trees
+
+Computing Quartet Concordance Factors:
+1. take set of gene trees, and for sets of 4 taxa abcd:
+  a. possibilities broken down into 
+  ab|cd, ac|bd, ad|bc, abcd   (unresolved/star)
+2. unresolved/stars have prob 0 under MSC, can be thrown out or used to add n_abcd / 3 to all other counts
+
+Step 1: import trees data using '''ape''' package's [read.tree](https://www.rdocumentation.org/packages/ape/versions/5.4-1/topics/read.tree) function.
+
+```{r}
+setwd("~/Github/phylo-microbes/data/")
+fileName = "knownGT/n10_n3000/1_astral.in" 
+gene_trees = read.tree(file = fileName)
+```
+
+Step 2: form a quartet table using MSCquartets '''quartetTable'''. 
+
+The resulting quartet table can be resolved (scrubbing unresolved/star trees) with '''resolveQuartetTable'''.
+```{r}
+QT = quartetTable(gene_trees, taxonnames = NULL, epsilon = 0, random = 0)
+
+QTR = quartetTableResolved(QT, omit = F)
+
+```
+
+hybridization / gene duplication/loss would result in probabilities diverging from the lines connecting the vertices to the centroid of the simplex plot.
+
+Step 3: use resolved quartet table to produce p-vals under different hypotheses. 
+
+'''quartetTreeTestInd''' - gene trees fit MSC model
+model = "T3", (T1 requires species tree topology). This outputs p-values for each quartet.
+
+Output can be used to plot the location on a simplex, and mark as reject/fail to reject based on p-values.
+
+```{r}
+MSC = quartetTreeTestInd(QTR, model = "T3")
+quartetTestPlot(MSC, test = "T3", alpha = 0.05, beta = 1, cex = 1)
+```
+
+Quartet concordance factors can also be visualized in simplex form sans p-test (not as valuable)
+
+```{r}
+simplexPrepare("T3",fileName)
+
+num_rows = nrow(QTR)
+for (row in 1:num_rows) {
+  point = c(QTR[row,"12|34"], QTR[row,"13|24"], QTR[row,"14|23"])
+  simplexPoint(point,pch=3,col="blue")
+}
+```
+
+
+
+
