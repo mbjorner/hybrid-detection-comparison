@@ -59,3 +59,6 @@ julia simulating-gene-trees.jl n100h20 5000 990579
 ```
 
 **Why hybridlambda over ms?** We choose hybridlambda now because it allows us to provide a network parenthetical format as input for the simulation of gene trees. With ms, we need to write down specific populations and the history of joining and splitting events, so it was harder to try for different networks.
+
+**Note** that the files with gene trees for `n50h10` and `n100h20` have an extra `-1` and some files are identical: `diff n100h20-gt1000-30-1.tre n100h20-gt1000-30-2.tre`.
+We will only use the files that end in `-1` and ignore (or even remove) the others.
