@@ -1,3 +1,16 @@
+## CHTCFunctions
+
+contains scripts for running on CHTC
+
+Currently supported:
+
+- MSCquartets (R)
+
+In Progress:
+
+- TICR (julia)
+- HyDe (python)
+
 ## HelperFunctions
 
 contains (primarily julia) helper functions that are used in construction of other methods and/or creation of simulated data.
