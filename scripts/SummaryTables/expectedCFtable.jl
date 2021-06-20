@@ -45,5 +45,7 @@ df_long = fittedQuartetCF(treesCF, :long)
 
 # write dataframe to CSV
 
-CSV.write(string("/Users/bjorner/GitHub/phylo-microbes/data/knownGT/trueNet", "10" ,".csv"), df_long)
+CSV.write(string("/Users/bjorner/GitHub/phylo-microbes/data/knownGT/n10_n30/trueNet10_1.csv"), df_long)
+
+# translate this table into the format of another here -
 
