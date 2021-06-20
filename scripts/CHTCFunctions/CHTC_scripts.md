@@ -4,17 +4,19 @@
 
 2. ssh into CHTC
 
-'''bash
+``` bash
+
 ssh submit-1.chtc.wisc.edu
 
-'''
+```
 
 3. transfer (secure copy) all scripts from home computer to chtc
 - command-t to open new tab in terminal
-'''bash
+```bash
+
 (base) % cd github/phylo-microbes/scripts/CHTCFunctions
 (base) % scp chtc* bjorner@submit-1.chtc.wisc.edu:/home/bjorner
-'''
+```
 - it will ask again for the password to login to CHTC 
 
 ## TICR
@@ -35,9 +37,9 @@ MSCQuartets depends only on an input file. This runs in R.
 1. Download R onto CHTC following https://chtc.cs.wisc.edu/r-jobs
 
 2. Download packages ape and MSCQuartets
-'''bash
+```bash
 
-'''
+```
 
 ## HyDe
 
