@@ -118,5 +118,19 @@ CSV.write(string("/Users/bjorner/GitHub/phylo-microbes/data/knownGT/n10_n30/summ
 # print rows where isHybrid (TICR), hybridExpected (expected (real)), OR MSC hybrid are 1
 # false positive / false negative rates
 
-        
+# MSCquartets
+falsePositivesTICR = 0
+falsePositivesMSC = 0
+allNegatives = 0
+for row in 1:setsOfQuartets
+    if string(TicrOut[row, :HybridExpected]) == string(0)
+        allNegatives = allNegatives + 1
+        if string(TicrOut[row, :MSC_hybrid) == string(1)
+            falsePositivesMSC = falsePositivesMSC + 1
+        end
+        if string(TicrOut[row, :isHybrid]) == string("TRUE")
+            falsePositivesTICR = FalsePositivesTICR + 1
+        end
+    end
+end
 
