@@ -5,11 +5,12 @@ contains scripts for running on CHTC
 Currently supported:
 
 - MSCquartets (R)
+- TICR (julia)
+- HyDe (python)
 
 In Progress:
 
-- TICR (julia)
-- HyDe (python)
+script that runs all three simultaneously
 
 ## HelperFunctions
 
