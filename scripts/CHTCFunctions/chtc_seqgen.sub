@@ -1,0 +1,24 @@
+# chtc_seqgen.sub
+
+tempProcess = $(Process) + 1
+newProcess = $INT(tempProcess)
+
+universe = vanilla
+log = job_$(Cluster).log
+error = job_$(Cluster)_$(newProcess).err
+output = job_$(Cluster)_$(newProcess).out
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+executable = run_seqgen.sh
+transfer_input_files = $(newProcess)_astral.in, Seq-Gen-1.3.4.tar.gz
+arguments = $(newProcess)_astral.in
+
+
+request_cpus = 1
+request_memory = 2GB
+request_disk = 2GB
+
+queue 1
+
+# queue newProcess from list.txt
