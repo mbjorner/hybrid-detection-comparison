@@ -28,7 +28,28 @@ TICR depends on a quartet maxcut tree, and an input file. This runs in julia.
 
 2. Download packages QuartetNetworkGoodnessFit, DataFrames, CSV, and PhyloNetworks
 
-### QuartetMaxCut
+In order to make the Concordance Factor tables available, we need several things:
+
+- TICR, as downloaded from github. This can be downloaded as a docker
+
+```bash 
+git clone https://github.com/nstenz/TICR.git
+```
+
+ 1. tar the file, and transport to chtc.
+
+ ```bash
+tar -czvf TICR.tar.gz TICR 
+scp TICR.tar.gz bjorner@submit-1.chtc.wisc.edu:/home/bjorner
+
+ ```
+
+2. CHTC runs others with linux x86_64; quartet maxcut executable used must correspond to that. Can be downloaded from xxxx
+
+```bash
+scp find-cut-Linux-64 bjorner@submit-1.chtc.wisc.edu:/home/bjorner
+
+```
 
 ## MSCQuartets
 
