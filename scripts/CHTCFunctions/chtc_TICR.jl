@@ -34,14 +34,14 @@ function main()
     
     geneTreeFile = ARGS[1]
     QMCTree = ARGS[2]
+    outFile = ARGS[3]
 
     treeCF = readTrees2CF(geneTreeFile);
     net = readTopology(QMCTree);
 
     ticrOut = ticr!(net, treeCF, true, quartetstat = :maxCF, test = :onesided)
 
-    numTrial = ARGS[1][1]
-    io = open(string("n10_n30_", numTrial, "_ticr.txt"), "w");
+    io = open(string(outFile), "w");
     write(io, Base.string(ticrOut));
 end
 

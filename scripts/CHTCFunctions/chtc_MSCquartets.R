@@ -23,6 +23,7 @@ MSC = quartetTreeTestInd(QTR, model = "T3")
 Star = quartetStarTestInd(QTR)
 
 CFpVals = cbind(MSC, Star[, "p_star"])
+outFileName = args[2]
 
-write.csv(CFpVals, paste(fileName, "MSC_table_output.csv", sep = "")) 
+write.csv(CFpVals, paste(outFileName, sep = "")) 
 
