@@ -44,7 +44,7 @@ scp TICR.tar.gz bjorner@submit-1.chtc.wisc.edu:/home/bjorner
 
  ```
 
-2. CHTC runs others with linux x86_64; quartet maxcut executable used must correspond to that. Can be downloaded from xxxx
+2. CHTC runs others with linux x86_64; quartet maxcut executable used must correspond to that. Can be downloaded from http://research.haifa.ac.il/~ssagi/software/QMCN.tar.gz
 
 ```bash
 scp find-cut-Linux-64 bjorner@submit-1.chtc.wisc.edu:/home/bjorner
