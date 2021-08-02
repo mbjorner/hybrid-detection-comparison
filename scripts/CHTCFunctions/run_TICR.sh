@@ -8,7 +8,7 @@ tar -xzf my-project-julia.tar.gz
 
 # add Julia binary to path
 export PATH=$_CONDOR_SCRATCH_DIR/julia-1.6.1/bin:$PATH
- # add Julia packages to DEPOT variable
+# add Julia packages to DEPOT variable
 export JULIA_DEPOT_PATH=$_CONDOR_SCRATCH_DIR/my-project-julia
 
  # run Julia script

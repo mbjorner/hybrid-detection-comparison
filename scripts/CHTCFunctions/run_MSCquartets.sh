@@ -16,12 +16,3 @@ export R_LIBS=$PWD/packages
 # run MSC quartets analysis on input file (R)
 Rscript chtc_MSCquartets.R $1
 
-# TICR with Julia
-# extract Julia binaries tarball
-tar -xzf julia-..-linux-x86_64.tar.gz
-
-# add Julia binary to path
- export PATH=$_CONDOR_SCRATCH_DIR/julia-#-#-#/bin:$PATH
-
- # run Julia script
- julia chtc_TICR.jl

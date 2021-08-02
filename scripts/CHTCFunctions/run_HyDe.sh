@@ -19,8 +19,12 @@ tar -xzf $ENVNAME.tar.gz -C $ENVDIR
 input=$1
 map=$2
 num_taxa=$3
+outgroup=10
+# for n10, out = 10; n15 =15, n25=25, n50=50, n100=53
+
+# input = 
 
 # modify this line to run your desired Python script and any other work you need to do
-python3 run_hyde.py -i ${input} -m ${map} -o out -n ${num_taxa} -t ${num_taxa} -s 500 --prefix n10trial
+run_hyde.py -i ${input} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s 500 --prefix n10trial
 
 
