@@ -18,7 +18,7 @@ import Pkg; Pkg.add("PhyloNetworks")
 using QuartetNetworkGoodnessFit, DataFrames, CSV, PhyloNetworks
 
 # constants
-alpha = 0.05 # significance level
+alpha = ARGS[3] # significance level
 
 # inputs
 

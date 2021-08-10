@@ -9,7 +9,7 @@
 # output: 
 
 
-exec '/Applications/Julia-1.5.app/Contents/Resources/julia/bin/julia'
+# exec '/Applications/Julia-1.5.app/Contents/Resources/julia/bin/julia'
 
 using QuartetNetworkGoodnessFit, DataFrames, CSV, PhyloNetworks
 
@@ -125,7 +125,7 @@ allNegatives = 0
 for row in 1:setsOfQuartets
     if string(TicrOut[row, :HybridExpected]) == string(0)
         allNegatives = allNegatives + 1
-        if string(TicrOut[row, :MSC_hybrid) == string(1)
+        if string(TicrOut[row, :MSC_hybrid]) == string(1)
             falsePositivesMSC = falsePositivesMSC + 1
         end
         if string(TicrOut[row, :isHybrid]) == string("TRUE")

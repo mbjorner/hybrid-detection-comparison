@@ -33,6 +33,7 @@ topologyMaxQPseudolik!(trueNetwork, treesCF);
 
 expectedCFTable = fittedQuartetCF(treesCF);
 df_long = fittedQuartetCF(treesCF, :long)
+outFile=ARGS[3]
 
 # df_long now stores the expected CFs
 # where there is a difference in minor CFs and expected CFs, 
@@ -40,7 +41,7 @@ df_long = fittedQuartetCF(treesCF, :long)
 
 # write dataframe to CSV
 
-CSV.write(string(ARGS[1], "_", ARGS[2], "_", ARGS[3], ".csv"), df_long)
+CSV.write(string(outFile), df_long)
 
 # translate this table into the format of another here -
 

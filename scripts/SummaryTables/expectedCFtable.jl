@@ -35,7 +35,6 @@ treesCF = readTrees2CF(genetrees)
 
 topologyMaxQPseudolik!(trueNetwork, treesCF);
 
-
 expectedCFTable = fittedQuartetCF(treesCF);
 df_long = fittedQuartetCF(treesCF, :long)
 

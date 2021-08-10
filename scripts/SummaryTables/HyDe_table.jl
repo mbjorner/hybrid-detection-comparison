@@ -21,8 +21,9 @@ using QuartetNetworkGoodnessFit, DataFrames, CSV, PhyloNetworks
 alpha = 0.05 # significance level
 
 # inputs
-HyDeFile = "/Users/bjorner/GitHub/HyDe/n10trial-out.txt"
-netFile = "/Users/bjorner/GitHub/phylo-microbes/data/knownGT/n10.net"
+
+HyDeFile = ARGS[1] #"/Users/bjorner/GitHub/HyDe/n10trial-out.txt"
+netFile = ARGS[2] #"/Users/bjorner/GitHub/phylo-microbes/data/knownGT/n10.net"
 
 # output file destination
 outFile = "HyDeComparison_n10_1"

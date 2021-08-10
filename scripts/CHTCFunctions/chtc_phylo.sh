@@ -28,6 +28,7 @@ seed=1000 #not yet integrated
 # .out is used for HyDe
 
 # unpack tarred files
+export WORKDIR=$PWD
 tar -xzf Seq-Gen-1.3.4.tar.gz
 
 # creates makefile
@@ -35,10 +36,9 @@ cd Seq-Gen-1.3.4
 cd source
 make
 
-# back!
-cd
+cd $WORKDIR
 
-./Seq-Gen-1.3.4/source/seq-gen -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l500 -s0.018 -n1 < $1 > $1_${network}_${num_gene_trees}_seqgen.out 2> $1_${network}_${num_gene_trees}_seqgen.log
+./Seq-Gen-1.3.4/source/seq-gen -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l500 -s0.018 -n1 < ${gene_trees} > ${gene_trees}_${network}_${num_gene_trees}_seqgen.out 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
 
 # have job exit if any command returns with non-zero exit status (aka failure)
 set -e
@@ -135,6 +135,7 @@ julia --project=my-project-julia chtc_HyDe_table.jl ${HyDeOut} ${true_network} $
 # TICR table
 # MSCquartets table
 
-julia --project=my-project-julia chtc_TICRMSC_table.jl ${expected_quartets_file} ${TICROut} ${MSCOut}
-
+TICRMSCSummaryOut=n$3_$4_${num_trial}_TICR_MSC_summary.csv
+julia --project=my-project-julia chtc_TICRMSC_table.jl ${expected_quartets_file} ${TICROut} ${MSCOut} ${significance} ${TICRMSCSummaryOut}
+# output = ??
 
