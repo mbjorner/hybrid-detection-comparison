@@ -26,18 +26,22 @@ HyDeFile = ARGS[1] #"/Users/bjorner/GitHub/HyDe/n10trial-out.txt"
 netFile = ARGS[2] #"/Users/bjorner/GitHub/phylo-microbes/data/knownGT/n10.net"
 
 # output file destination
-outFile = "HyDeComparison_n10_1"
+outFile = ARGS[4]
 
 HyDeOut = DataFrame(CSV.File(HyDeFile))
 net = readTopologyLevel1(netFile);
 
 # create new column called "HyDeHybrid" 1 / 0 (default is 0)
-insert!(HyDeOut, 6, 0, :HyDeHybrid)
-HyDeOut[(HyDeOut[:Pvalue] .< alpha), :HyDeHybrid]=1
+insertcols!(HyDeOut, 6, :HyDeHybrid => 0)
+for row in 1:size(HyDeOut,1)
+    if (HyDeOut[row, :Pvalue] .< parse[Float64,alpha])
+        HyDeOut[row, :HyDeHybrid]=1
+    end
+end
 
 # create new column "Hybrid triplet" 1 / 0
-insert!(HyDeOut, 7, 0, :HybridTripletExpected)
-insert!(HyDeOut, 8, 0, :HybridCorrectID)
+insertcols!(HyDeOut, 7, :HybridTripletExpected => 0)
+insertcols!(HyDeOut, 8, :HybridCorrectID => 0)
 
 setsOfTriplets = size(HyDeOut)[1]
 
@@ -70,20 +74,20 @@ for row in 1:setsOfTriplets
 end
 
 # HyDeOut
-CSV.write(string(outfile ,".csv"), HyDeOut)
+CSV.write(string(outfile), HyDeOut)
 
 # False positives / False Negatives rate
 # false positives are when hyde detects a hybrid relationship where there isn't one
 
 # count all positives where it should be a negative / count all negatives
-falsePositives = 0
-allNegatives = 0
-for row in 1:setsOfTriplets
-    if string(HyDeOut[row, :HybridTripletExpected]) == string(0)
-        allNegatives = allNegatives + 1
-        if string(HyDeOut[row, :HyDeHybrid]) == string(1)
-            falsePositives = falsePositives + 1
-        end
-    end
-end
+#falsePositives = 0
+#allNegatives = 0
+#for row in 1:setsOfTriplets
+#    if string(HyDeOut[row, :HybridTripletExpected]) == string(0)
+#        allNegatives = allNegatives + 1
+#        if string(HyDeOut[row, :HyDeHybrid]) == string(1)
+#            falsePositives = falsePositives + 1
+#        end
+#    end
+# end
 

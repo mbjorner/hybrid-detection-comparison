@@ -40,9 +40,18 @@ function main()
     net = readTopology(QMCTree);
 
     ticrOut = ticr!(net, treeCF, true, quartetstat = :maxCF, test = :onesided)
+    
+    treeCF = writeTableCF(treeCF);
+    if length(ticrOut[5]) != nrow(treeCF)
+        println("These are not the same length, should end")
+        println("length of ticrOut is ", length(ticrOut[5]))
+        println("number of rows of CFtree is ", nrow(treeCF))
+    end
+    
+    insertcols!(treeCF, 9, :pValTicr => ticrOut[5]);
+    
+    CSV.write(string(outFile), treeCF)
 
-    io = open(string(outFile), "w");
-    write(io, Base.string(ticrOut));
 end
 
 main()

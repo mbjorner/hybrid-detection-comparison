@@ -20,7 +20,7 @@ num_trial=$6
 
 #variables: 
 # seqgen 
-seed=1000 #not yet integrated
+seed=275890
 
 
 ## seqgen: 
@@ -38,7 +38,8 @@ make
 
 cd $WORKDIR
 
-./Seq-Gen-1.3.4/source/seq-gen -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l500 -s0.018 -n1 < ${gene_trees} > ${gene_trees}_${network}_${num_gene_trees}_seqgen.out 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
+seqgen_out=${gene_trees}_${network}_${num_gene_trees}_seqgen.out
+./Seq-Gen-1.3.4/source/seq-gen -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l500 -s0.018 -n1 -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
 
 # have job exit if any command returns with non-zero exit status (aka failure)
 set -e
@@ -55,7 +56,7 @@ tar -xzf $ENVNAME.tar.gz -C $ENVDIR
 . $ENVDIR/bin/activate
 
  # run HyDe script using inputs
-input=$1_$3_$4_seqgen.out
+input=${gene_trees}_${network}_${num_gene_trees}_seqgen.out
 map=$2
 num_taxa=$3
 
@@ -67,7 +68,7 @@ case "$3" in
 esac
 
 # modify this line to run your desired Python script and any other work you need to do
-run_hyde.py -i ${input} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s 500 --prefix $1_$3_$4_HyDe
+run_hyde.py -i ${seqgen_out} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s 500 --prefix $1_$3_$4_HyDe
 
 HyDeOut=$1_$3_$4_HyDe-out.txt #verify this
 
@@ -97,7 +98,7 @@ julia --project=my-project-julia chtc_cfTable.jl $1
 ./TICR/scripts/get-pop-tree.pl $1.CFs.csv
 # this creates a file named $1.QMC.tre
 
-TICROut=n$3_$4_${num_trial}_ticr.txt
+TICROut=n$3_$4_${num_trial}_ticr.csv
 julia --project=my-project-julia chtc_TICR.jl $1 $1.QMC.tre ${TICROut}
 #outputs: table of obsCF printed to file tableCF.txt, desciptive stat of input data printed to file summaryTreesQuartets.txt
 
@@ -114,7 +115,7 @@ export R_LIBS=$PWD/packages
 
 MSCOut=n$3_$4_${num_trial}_MSC.csv
 # run MSC quartets analysis on input file (R)
-Rscript chtc_MSCquartets.R $1 $2
+Rscript chtc_MSCquartets.R $1 ${MSCOut}
 
 # TICR, HyDe, and MSCQuartets produce three different output files, 
 # which can then be used to build a comparison table, and compared to a true network file
@@ -128,14 +129,21 @@ export JULIA_DEPOT_PATH=$_CONDOR_SCRATCH_DIR/my-project-julia
 expected_quartets_file=n$3_$4_${num_trial}_expected.csv
 julia --project=my-project-julia chtc_expected_cfTable.jl ${true_network} ${gene_trees} ${expected_quartets_file}
 
-# HyDe table
 significance=0.05
-julia --project=my-project-julia chtc_HyDe_table.jl ${HyDeOut} ${true_network} ${significance}
+TICRMSCSummaryOut=n$3_$4_${num_trial}_TICR_MSC_summary.csv
+julia --project=my-project-julia chtc_TICRMSC_table.jl ${expected_quartets_file} ${TICROut} ${MSCOut} ${significance} ${TICRMSCSummaryOut}
+# output = ??
+
+# HyDe table
+
+# HyDeOutName=n$3_$4_${num_trial}_HyDe.csv
+# julia --project=my-project-julia chtc_HyDe_table.jl ${HyDeOut} ${true_network} ${significance} ${HyDeOutName}
 
 # TICR table
 # MSCquartets table
 
-TICRMSCSummaryOut=n$3_$4_${num_trial}_TICR_MSC_summary.csv
-julia --project=my-project-julia chtc_TICRMSC_table.jl ${expected_quartets_file} ${TICROut} ${MSCOut} ${significance} ${TICRMSCSummaryOut}
-# output = ??
+rm *_expected.csv
+rm *_MSC.csv
+rm *_ticr.csv
+rm *astral*
 
