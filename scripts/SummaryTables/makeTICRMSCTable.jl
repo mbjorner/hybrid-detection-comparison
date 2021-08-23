@@ -26,7 +26,7 @@ alpha = 0.05
 
 # create a matrix of sets of 3, of the floats at Expected[6,7] - or just Expected[7]
 setsOfQuartets = size(TicrOut, 1)
-expectedVals = reshape(Expected[7], (3, setsOfQuartets))'
+expectedVals = reshape(Expected[!, 7], (3, setsOfQuartets))'
 
 # paste to end of TICROutPut
 

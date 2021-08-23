@@ -51,7 +51,7 @@ if length(ticrOut[5]) != nrow(treeCF)
 end
 
 # pastes the p-values to dataframe
-insert!(treeCF, 9, ticrOut[5], :pValTicr)
+insertcols!(treeCF, 9, :pValTicr => ticrOut[5])
 
 # to find if pValTicr is less than alpha of 0.05
 # create a new column to indicate if the p-value is less than 0.05
