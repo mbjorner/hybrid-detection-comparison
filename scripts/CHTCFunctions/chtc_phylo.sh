@@ -146,4 +146,5 @@ rm *_expected.csv
 rm *_MSC.csv
 rm *_ticr.csv
 rm *astral*
+rm *n25h5-gt*
 

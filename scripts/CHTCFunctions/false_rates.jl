@@ -13,7 +13,7 @@ total_false = DataFrame(gene_trees = Float64[],  trial_num = Float64[], ticr_fp 
 num_gene_trees = [30,100,300,1000,3000]
 for num_trees in num_gene_trees
     for file_number in 1:30
-      file = DataFrame(CSV.File(string("n10_", num_trees, "_", file_number, "_TICR_MSC_summary.csv")))
+      file = DataFrame(CSV.File(string(trees,"_", num_trees, "_", file_number, "_TICR_MSC_summary.csv")))
 
        insertcols!(file, size(file, 2) + 1, :TICR_hybrid => 0);
         insertcols!(file, size(file, 2) + 1, :TICR_FP => 0);
