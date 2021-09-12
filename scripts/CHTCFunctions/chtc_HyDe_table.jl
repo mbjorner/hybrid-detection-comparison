@@ -34,7 +34,7 @@ net = readTopologyLevel1(netFile);
 # create new column called "HyDeHybrid" 1 / 0 (default is 0)
 insertcols!(HyDeOut, 6, :HyDeHybrid => 0)
 for row in 1:size(HyDeOut,1)
-    if (HyDeOut[row, :Pvalue] .< parse[Float64,alpha])
+    if (HyDeOut[row, :Pvalue] .< parse(Float64,alpha))
         HyDeOut[row, :HyDeHybrid]=1
     end
 end

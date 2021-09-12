@@ -167,5 +167,28 @@ cd source
 make
 ```
 
+After simulations are run, they should produce output files of TICR and MSC summary tables
+These can be moved from the home directory into an output folder, a tar ball can be created,
+and this can be transfered back to the home computer for data analysis. 
+
+```bash
+
+mv *prefix*.csv output
+tar -czvf output.tar.gz output
+
+# then on home computer, transfer the file back:
+scp bjorner@submit-1.chtc.wisc.edu:/home/bjorner/output.tar.gz ./
+
+```
 
 
+Simulating scripts;
+
+```bash 
+
+git clone https://github.com/hybridLambda/hybrid-Lambda.git
+cd hybrid-lambda 
+cd src 
+make
+
+```

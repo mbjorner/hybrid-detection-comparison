@@ -32,14 +32,20 @@ export WORKDIR=$PWD
 tar -xzf Seq-Gen-1.3.4.tar.gz
 
 # creates makefile
-cd Seq-Gen-1.3.4 
-cd source
-make
+#cd Seq-Gen-1.3.4 
+#cd source
+#make
 
 cd $WORKDIR
 
+#cd Seq-Gen-1.3.4 
+#cd source
+#ls
+
+#chmod +x ./Seq-Gen-1.3.4/source/seq-gen
+
 seqgen_out=${gene_trees}_${network}_${num_gene_trees}_seqgen.out
-./Seq-Gen-1.3.4/source/seq-gen -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l500 -s0.018 -n1 -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
+./Seq-Gen-1.3.4/source/seq-gen -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l50000 -s0.018 -n1 -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
 
 # have job exit if any command returns with non-zero exit status (aka failure)
 set -e
@@ -63,12 +69,16 @@ num_taxa=$3
 # for n10, out = 10; n15=15, n25=25, n50=50, n100=53
 outgroup=$3
 case "$3" in
-   "100") outgroup=53
+   100) outgroup=t53_1
+   ;;
+   25) outgroup=t25_1
+   ;;
+   50) outgroup=t50_1
    ;;
 esac
 
 # modify this line to run your desired Python script and any other work you need to do
-run_hyde.py -i ${seqgen_out} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s 500 --prefix $1_$3_$4_HyDe
+run_hyde.py -i ${seqgen_out} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s 50000 --prefix $1_$3_$4_HyDe
 
 HyDeOut=$1_$3_$4_HyDe-out.txt #verify this
 
@@ -84,38 +94,38 @@ HyDeOut=$1_$3_$4_HyDe-out.txt #verify this
 # extract Julia binaries tarball
 tar -xzf julia-1.6.1-linux-x86_64.tar.gz
 tar -xzf my-project-julia.tar.gz
-tar -xzf TICR.tar.gz
+#tar -xzf TICR.tar.gz
 
 # add Julia binary to path
-export PATH=$_CONDOR_SCRATCH_DIR/julia-1.6.1/bin:$PATH
+#export PATH=$_CONDOR_SCRATCH_DIR/julia-1.6.1/bin:$PATH
 # add Julia packages to DEPOT variable
-export JULIA_DEPOT_PATH=$_CONDOR_SCRATCH_DIR/my-project-julia
+#export JULIA_DEPOT_PATH=$_CONDOR_SCRATCH_DIR/my-project-julia
 
 # in order to use quartet max cut, it needs an input that is produced by the script
-julia --project=my-project-julia chtc_cfTable.jl $1
+#julia --project=my-project-julia chtc_cfTable.jl $1
 
 # requires quartet max cut [find-cut-Linux-64] in working directory; 
-./TICR/scripts/get-pop-tree.pl $1.CFs.csv
+#./TICR/scripts/get-pop-tree.pl $1.CFs.csv
 # this creates a file named $1.QMC.tre
 
-TICROut=n$3_$4_${num_trial}_ticr.csv
-julia --project=my-project-julia chtc_TICR.jl $1 $1.QMC.tre ${TICROut}
+#TICROut=n$3_$4_${num_trial}_ticr.csv
+#julia --project=my-project-julia chtc_TICR.jl $1 $1.QMC.tre ${TICROut}
 #outputs: table of obsCF printed to file tableCF.txt, desciptive stat of input data printed to file summaryTreesQuartets.txt
 
 ## MSCquartets
 
-tar -xzf R402.tar.gz
-tar -xzf packages.tar.gz
+#tar -xzf R402.tar.gz
+#tar -xzf packages.tar.gz
 
 # make sure the script will use your R installation, 
 # and the working directory as its home location
-export PATH=$PWD/R/bin:$PATH
-export RHOME=$PWD/R
-export R_LIBS=$PWD/packages
+#export PATH=$PWD/R/bin:$PATH
+#export RHOME=$PWD/R
+#export R_LIBS=$PWD/packages
 
-MSCOut=n$3_$4_${num_trial}_MSC.csv
+#MSCOut=n$3_$4_${num_trial}_MSC.csv
 # run MSC quartets analysis on input file (R)
-Rscript chtc_MSCquartets.R $1 ${MSCOut}
+# Rscript chtc_MSCquartets.R $1 ${MSCOut}
 
 # TICR, HyDe, and MSCQuartets produce three different output files, 
 # which can then be used to build a comparison table, and compared to a true network file
@@ -130,14 +140,14 @@ expected_quartets_file=n$3_$4_${num_trial}_expected.csv
 julia --project=my-project-julia chtc_expected_cfTable.jl ${true_network} ${gene_trees} ${expected_quartets_file}
 
 significance=0.05
-TICRMSCSummaryOut=n$3_$4_${num_trial}_TICR_MSC_summary.csv
-julia --project=my-project-julia chtc_TICRMSC_table.jl ${expected_quartets_file} ${TICROut} ${MSCOut} ${significance} ${TICRMSCSummaryOut}
+# TICRMSCSummaryOut=n$3_$4_${num_trial}_TICR_MSC_summary.csv
+# julia --project=my-project-julia chtc_TICRMSC_table.jl ${expected_quartets_file} ${TICROut} ${MSCOut} ${significance} ${TICRMSCSummaryOut}
 # output = ??
 
 # HyDe table
 
-# HyDeOutName=n$3_$4_${num_trial}_HyDe.csv
-# julia --project=my-project-julia chtc_HyDe_table.jl ${HyDeOut} ${true_network} ${significance} ${HyDeOutName}
+HyDeOutName=n$3_$4_${num_trial}_HyDe.csv
+julia --project=my-project-julia chtc_HyDe_table.jl ${HyDeOut} ${true_network} ${significance} ${HyDeOutName}
 
 # TICR table
 # MSCquartets table
@@ -145,6 +155,6 @@ julia --project=my-project-julia chtc_TICRMSC_table.jl ${expected_quartets_file}
 rm *_expected.csv
 rm *_MSC.csv
 rm *_ticr.csv
+rm *-gt*
 rm *astral*
-rm *n25h5-gt*
 

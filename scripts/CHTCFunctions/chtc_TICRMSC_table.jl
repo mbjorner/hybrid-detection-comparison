@@ -32,8 +32,8 @@ insertcols!(TicrOut, size(TicrOut, 2) + 1, :expCF14_23 => expectedVals[:,3])
 
 #create new matrix of size size(expectedVals, 1)
 hybridExpected = Vector{Bool}(undef, size(expectedVals, 1))
-for i in size(expectedVals, 1)
-    if (expectedVals[i,1] == expectedVals[i,2] || expectedVals[i,2] == expectedVals[i,3] || expectedVals[i,1] == expectedVals[i,3])
+for i in 1:size(expectedVals, 1) #for number of rows
+    if (expectedVals[i,1] .== expectedVals[i,2] || expectedVals[i,2] .== expectedVals[i,3] || expectedVals[i,1] .== expectedVals[i,3])
         result = 0
     else
         result = 1
@@ -46,7 +46,6 @@ insertcols!(TicrOut, size(TicrOut, 2) + 1, :hybridExpected => hybridExpected)
 # hybrid table is a little messier
 
 hybridMSC = Vector{Bool}(undef, size(expectedVals, 1))
-MSCDF = DataFrame(CF12_34 = Float64[],  CF13_24 = Float64[], CF14_23 = Float64[], Pval = Float64[], hybrid = Float64[])
 colNames = names(MSCOut)
 
 # index of 12|34, 13|24, 14|23
