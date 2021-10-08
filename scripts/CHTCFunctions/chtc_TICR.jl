@@ -32,11 +32,15 @@ using QuartetNetworkGoodnessFit, DataFrames, CSV, PhyloNetworks, ArgParse
 function main()
     # parsed_args = parse_commandline()
     
-    geneTreeFile = ARGS[1]
-    QMCTree = ARGS[2]
-    outFile = ARGS[3]
+    geneTreeFile = ARGS[1] #
+    QMCTree = ARGS[2]      #
+    outFile = ARGS[3]      #
 
     treeCF = readTrees2CF(geneTreeFile);
+
+    # thought that because of results of p-values giving high false negatives/false positives, this was indicative of this not working, but it seems
+    # the issue is really that p-values are representations of how well they are being represented by the QMC tree.
+    # treeCF = DataFrame(CSV.File("tableCF.txt"));
     net = readTopology(QMCTree);
 
     ticrOut = ticr!(net, treeCF, true, quartetstat = :maxCF, test = :onesided)
@@ -49,8 +53,9 @@ function main()
     end
     
     insertcols!(treeCF, 9, :pValTicr => ticrOut[5]);
+    insertcols!(treeCF, 10, :overallPval => ticrOut[1]);
     
-    CSV.write(string(outFile), treeCF)
+    CSV.write(string(outFile), treeCF);
 
 end
 
