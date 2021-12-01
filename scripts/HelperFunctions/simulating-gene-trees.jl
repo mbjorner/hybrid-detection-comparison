@@ -1,7 +1,7 @@
 ## julia script to simulate gene trees on complex networks
 ## julia simulating-gene-trees.jl file numgt seed
 ## Claudia August 2020
-
+import Pkg; Pkg.add("Distributions")
 using PhyloNetworks, Random, Distributions
 ##using PhyloPlots
 ##using StatsBase, DataFrames, CSV
@@ -10,13 +10,14 @@ include("functions.jl")
 
 ## Mac:
 hybridlambda = "/Users/Clauberry/Dropbox/software/hybrid-Lambda/src/hybrid-Lambda"
+hybridlambda = "/Users/bjorner/GitHub/hybrid-lambda/src/hybrid-Lambda" # cloned github repo and make
 ##makeultrametric = "/Users/Clauberry/Dropbox/Documents/solislemus-lab/my-projects/present/ransanec/ransanec/scripts/makeultrametric"
-folder = "../data/"
+folder = "/Users/bjorner/GitHub/phylo-microbes/data/knownGT/"
 
-file = "n50h10"
-numgt = 50
-seed = 198312
-nrep = 30 ##fixed
+file = "20211109_simpleNetwork"
+numgt = 500
+seed = 704329
+nrep = 30 ##fixed (should be 30)
 
 if length(ARGS) > 0
     file = ARGS[1]
@@ -25,6 +26,7 @@ if length(ARGS) > 0
 end
 
 outgroup = "t25"
+outgroup = "15"
 if file == "n50h10"
     outgroup = "t50"
 elseif file == "n100h20"

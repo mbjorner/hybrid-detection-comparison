@@ -14,4 +14,8 @@ cd
 
 ./Seq-Gen-1.3.4/source/seq-gen -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l500 -s0.018 -n1 < $1 > $1_seqgen.out 2> $1_seqgen.log
 
+
+./Seq-Gen-1.3.4/source/seq-gen -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l500 -s0.018 -n1 -op < toy.tre > toy.phy 2> toy_seqgen.log
+
+
 # this $1_seqgen.out file can then be used by HyDe

@@ -8,10 +8,6 @@ Currently supported:
 - TICR (julia)
 - HyDe (python)
 
-In Progress:
-
-script that runs all three simultaneously
-
 ## HelperFunctions
 
 contains (primarily julia) helper functions that are used in construction of other methods and/or creation of simulated data.

@@ -16,7 +16,7 @@ cd("/Users/bjorner/GitHub/phylo-microbes/data/knownGT/n10_n30/")
 tree = joinpath("1_astral.in")
 
 treeCF = readTrees2CF(tree)
-
+treeCF = DataFrame(CSV.File("tableCF.txt"));
 # ticr(treeCF, :maxCF, :onesided)
 
 # ERROR: ArgumentError: reducing over an empty collection is not allowed
@@ -27,6 +27,8 @@ QMCTree = joinpath("1_astral.QMC.tre")
 net = readTopology(QMCTree);
 
 ticrOut = ticr!(net, treeCF, true, quartetstat = :maxCF, test = :onesided)
+
+CSV.write("ticrTree.csv",treeCF)
 
 io = open("n10_n30_1_ticr.txt", "w");
 write(io, Base.string(ticrOut));

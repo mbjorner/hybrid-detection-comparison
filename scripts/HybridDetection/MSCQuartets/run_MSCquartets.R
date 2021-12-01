@@ -1,4 +1,3 @@
-
 library(MSCquartets)
 library(ape)
 
@@ -6,7 +5,7 @@ setwd("~/Github/phylo-microbes/")
 
 # look into https://stackoverflow.com/questions/14958516/read-all-files-in-directory-and-apply-multiple-functions-to-each-data-frame
 
-networks = c("n10", "n15")
+networks = c("n10")
 num_tree = c("n100", "n1000", "n30", "n300", "n3000")
 times = c()
 
@@ -23,6 +22,17 @@ for (netnums in networks) {
       
       MSC = quartetTreeTestInd(QTR, model = "T3")
       Star = quartetStarTestInd(QTR)
+      
+      # quartet tree test to see if the output tree fits the MSC model
+      
+      quartetTreeTest(
+        obs,
+        model = "T3",
+        lambda = 0,
+        method = "MLest",
+        smallcounts = "approximate",
+        bootstraps = 10^4
+      )
       
       CFpVals = cbind(MSC, Star[, "p_star"])
 

@@ -20,7 +20,7 @@ if (length(Number_of_Gene_Trees) == 5) {
   #                sum(summary_table$ticr_fp[61:90])/sum(summary_table$true_neg[61:90]), 
   #                sum(summary_table$ticr_fp[91:120])/sum(summary_table$true_neg[91:120]), 
   #                sum(summary_table$ticr_fp[121:150])/sum(summary_table$true_neg[121:150]))
- # avg_ticr_fn = c(sum(summary_table$ticr_fn[1:30])/sum(summary_table$true_pos[1:30]), 
+  # avg_ticr_fn = c(sum(summary_table$ticr_fn[1:30])/sum(summary_table$true_pos[1:30]), 
   #               sum(summary_table$ticr_fn[31:60])/sum(summary_table$true_pos[31:60]), 
   #               sum(summary_table$ticr_fn[61:90])/sum(summary_table$true_pos[61:90]), 
   #               sum(summary_table$ticr_fn[91:120])/sum(summary_table$true_pos[91:120]), 
@@ -40,18 +40,18 @@ if (length(Number_of_Gene_Trees) == 5) {
   #                    sum(summary_table$ticr_fp[31:60])/sum(summary_table$true_neg[31:60]), 
   #                    sum(summary_table$ticr_fp[61:90])/sum(summary_table$true_neg[61:90]), 
   #                    sum(summary_table$ticr_fp[91:120])/sum(summary_table$true_neg[91:120]))
- # avg_ticr_fn = c(sum(summary_table$ticr_fn[1:30])/sum(summary_table$true_pos[1:30]), 
+  # avg_ticr_fn = c(sum(summary_table$ticr_fn[1:30])/sum(summary_table$true_pos[1:30]), 
   #                    sum(summary_table$ticr_fn[31:60])/sum(summary_table$true_pos[31:60]), 
   #                    sum(summary_table$ticr_fn[61:90])/sum(summary_table$true_pos[61:90]), 
-   #                   sum(summary_table$ticr_fn[91:120])/sum(summary_table$true_pos[91:120]))
+  #                   sum(summary_table$ticr_fn[91:120])/sum(summary_table$true_pos[91:120]))
   avg_msc_fp = c(sum(summary_table$msc_fp[1:30])/sum(summary_table$true_neg[1:30]), 
-                     sum(summary_table$msc_fp[31:60])/sum(summary_table$true_neg[31:60]), 
-                     sum(summary_table$msc_fp[61:90])/sum(summary_table$true_neg[61:90]), 
-                     sum(summary_table$msc_fp[91:120])/sum(summary_table$true_neg[91:120]))
+                 sum(summary_table$msc_fp[31:60])/sum(summary_table$true_neg[31:60]), 
+                 sum(summary_table$msc_fp[61:90])/sum(summary_table$true_neg[61:90]), 
+                 sum(summary_table$msc_fp[91:120])/sum(summary_table$true_neg[91:120]))
   avg_msc_fn = c(sum(summary_table$msc_fn[1:30])/sum(summary_table$true_pos[1:30]), 
-                     sum(summary_table$msc_fn[31:60])/sum(summary_table$true_pos[31:60]), 
-                     sum(summary_table$msc_fn[61:90])/sum(summary_table$true_pos[61:90]), 
-                     sum(summary_table$msc_fn[91:120])/sum(summary_table$true_pos[91:120]))
+                 sum(summary_table$msc_fn[31:60])/sum(summary_table$true_pos[31:60]), 
+                 sum(summary_table$msc_fn[61:90])/sum(summary_table$true_pos[61:90]), 
+                 sum(summary_table$msc_fn[91:120])/sum(summary_table$true_pos[91:120]))
 }
 
 
