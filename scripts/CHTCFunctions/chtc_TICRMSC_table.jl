@@ -21,7 +21,7 @@ alpha = ARGS[4]
 
 # create a matrix of sets of 3, of the floats at Expected[6,7] - or just Expected[7]
 setsOfQuartets = size(TicrOut, 1)
-overallPval = TicrOut[10];
+overallPval = TicrOut[1,10];
 print(setsOfQuartets)
 expectedVals = reshape(Expected[!, 7], (3, setsOfQuartets))'
 
@@ -47,6 +47,7 @@ insertcols!(TicrOut, size(TicrOut, 2) + 1, :hybridExpected => hybridExpected)
 
 # hybrid table is a little messier
 
+MSCDF = DataFrame(CF12_34 = Float64[],  CF13_24 = Float64[], CF14_23 = Float64[], Pval = Float64[], hybrid = Float64[])
 hybridMSC = Vector{Bool}(undef, size(expectedVals, 1))
 colNames = names(MSCOut)
 
