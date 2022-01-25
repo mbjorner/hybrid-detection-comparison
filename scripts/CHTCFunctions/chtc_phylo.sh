@@ -46,10 +46,13 @@ cd $WORKDIR
 
 #chmod +x ./Seq-Gen-1.3.4/source/seq-gen
 
-for j in 10000 30000 50000 100000
+for j in 10000 30000 50000 100000 250000 500000
 do
    seqgen_out=${j}_${gene_trees}_${network}_${num_gene_trees}_seqgen.out
-   ./Seq-Gen-1.3.4/source/seq-gen -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l${j} -s0.018 -n1 -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
+   ./Seq-Gen-1.3.4/source/seq-gen -mGTR -r 1.0 0.2 10.0 0.75 3.2 1.6 -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -l${j} -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
+   
+   # OLD PARAMS
+   # -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l${j} -s0.018 -n1 -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
    echo "${seqgen_out}"
 done
 # have job exit if any command returns with non-zero exit status (aka failure)
@@ -82,11 +85,13 @@ ENVDIR=$ENVNAME
       ;;
       5) outgroup=E
       ;;
+      4) outgroup=O
+      ;;
    esac
 
 # modify this line to run your desired Python script and any other work you need to do
 
-for i in 10000 30000 50000 100000
+for i in 10000 30000 50000 100000 250000 500000
 do
    echo "$i"
    seqgen_output=${i}_${gene_trees}_${network}_${num_gene_trees}_seqgen.out
@@ -118,11 +123,11 @@ export JULIA_DEPOT_PATH=$_CONDOR_SCRATCH_DIR/my-project-julia
 
 # HyDe table
 
-for i in 10000 30000 50000 100000
+for i in 10000 30000 50000 100000 250000 500000
 do
 HyDeOut=$1_$3_$4_${i}_HyDe-out.txt 
-HyDeOutName=$5_n$3_$4_${num_trial}_${i}_HyDe.csv
-julia --project=my-project-julia chtc_HyDe_table.jl ${HyDeOut} ${true_network} ${significance} ${HyDeOutName}
+HyDeOutName=$5_n$3_$4_${num_trial}_${i}_HyDe_Dstat.csv
+julia --project=my-project-julia chtc_HyDe_Dstat_table.jl ${HyDeOut} ${true_network} ${significance} ${HyDeOutName}
 done
 
 rm *HyDe-out*txt
@@ -166,7 +171,6 @@ MSCOut=$5_n$3_$4_${num_trial}_MSC.csv
 
    expected_quartets_file=n$3_$4_${num_trial}_expected.csv
    julia --project=my-project-julia chtc_expected_cfTable.jl ${true_network} ${gene_trees} ${expected_quartets_file}
-
 
  TICRMSCSummaryOut=$5_n$3_$4_${num_trial}_TICR_MSC_summary.csv
  julia --project=my-project-julia chtc_TICRMSC_table.jl ${expected_quartets_file} ${TICROut} ${MSCOut} ${significance} ${TICRMSCSummaryOut}

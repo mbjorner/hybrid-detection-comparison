@@ -12,7 +12,8 @@ include("functions.jl")
 hybridlambda = "/Users/Clauberry/Dropbox/software/hybrid-Lambda/src/hybrid-Lambda"
 hybridlambda = "/Users/bjorner/GitHub/hybrid-lambda/src/hybrid-Lambda" # cloned github repo and make
 ##makeultrametric = "/Users/Clauberry/Dropbox/Documents/solislemus-lab/my-projects/present/ransanec/ransanec/scripts/makeultrametric"
-folder = "/Users/bjorner/GitHub/phylo-microbes/data/knownGT/"
+folder = "/Users/bjorner/GitHub/phylo-microbes/data/knownGT/singleNet/"
+folder = "/Users/bjorner/GitHub/phylo-microbes/data/HyDe_four_taxon/long_branches/"
 
 file = "20211109_simpleNetwork"
 numgt = 500
@@ -26,7 +27,8 @@ if length(ARGS) > 0
 end
 
 outgroup = "t25"
-outgroup = "15"
+outgroup = "10"
+outgroup = "O"
 if file == "n50h10"
     outgroup = "t50"
 elseif file == "n100h20"
@@ -50,6 +52,9 @@ for i in 1:nrep
     @show i
     for j in 1:k
         @show j
+        #seed = seed * 100;
+        #Random.seed!(seed);
+        #ss = sample(1:55555,nrep*k)
         nn = numgt > 1000 ? 1000 : numgt
         simulateGeneTrees(string(i,"-",j),file,"",outgroup,nn, ss[i], hybridlambda)
     end

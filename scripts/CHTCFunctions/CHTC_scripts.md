@@ -299,20 +299,20 @@ julia simulating-gene-trees.jl n15blue 30 254790
 julia simulating-gene-trees.jl n15blue 100 168904
 julia simulating-gene-trees.jl n15blue 300 578520
 julia simulating-gene-trees.jl n15blue 1000 469980
-julia simulating-gene-trees.jl n15blue 3000 808631
+#julia simulating-gene-trees.jl n15blue 3000 808631
 
 julia simulating-gene-trees.jl n15red 30 987034
 julia simulating-gene-trees.jl n15red 100 291823
 julia simulating-gene-trees.jl n15red 300 746134
 julia simulating-gene-trees.jl n15red 1000 219083
-julia simulating-gene-trees.jl n15red 3000 487245
+#julia simulating-gene-trees.jl n15red 3000 487245
 
 julia simulating-gene-trees.jl n15orange 30 614827
 julia simulating-gene-trees.jl n15orange 100 129368
 julia simulating-gene-trees.jl n15orange 300 123954
 julia simulating-gene-trees.jl n15orange 1000 789102
-julia simulating-gene-trees.jl n15orange 3000 347796
+#julia simulating-gene-trees.jl n15orange 3000 347796
 
 removing the _1 from the output files requires running them with
 
-sed -i '' 's/_1//g' n10orange*
+sed -i '' 's/_1//g' n*

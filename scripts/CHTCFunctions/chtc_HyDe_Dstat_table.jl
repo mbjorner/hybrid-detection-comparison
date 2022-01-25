@@ -7,6 +7,7 @@
 #    significance level
 # Output:
 #    Table comparing HyDe output to expected results
+#    Calculates D-statistic, p-value, z-score for D-statistic using HyDe ABBA / ABAB output
 
 # exec '/Applications/Julia-1.5.app/Contents/Resources/julia/bin/julia'
 
@@ -14,8 +15,10 @@ import Pkg; Pkg.add("QuartetNetworkGoodnessFit")
 import Pkg; Pkg.add("DataFrames")
 import Pkg; Pkg.add("CSV")
 import Pkg; Pkg.add("PhyloNetworks")
+import Pkg; Pkg.add("Distributions")
+import Pkg; Pkg.add("Statistics")
 
-using QuartetNetworkGoodnessFit, DataFrames, CSV, PhyloNetworks
+using QuartetNetworkGoodnessFit, DataFrames, CSV, PhyloNetworks, Statistics, Distributions
 
 # constants
 if (length(ARGS) > 0)
@@ -47,8 +50,17 @@ for row in 1:size(HyDeOut,1)
 end
 
 # create new column "Hybrid triplet" 1 / 0
-insertcols!(HyDeOut, 7, :HybridTripletExpected => 0)
-insertcols!(HyDeOut, 8, :HybridCorrectID => 0)
+if ("HybridTripletExpected" in names(HyDeOut))
+else
+    insertcols!(HyDeOut, 7, :HybridTripletExpected => 0)
+end 
+if ("HybridCorrectID" in names(HyDeOut))
+else
+    insertcols!(HyDeOut, 8, :HybridCorrectID => 0)
+end
+insertcols!(HyDeOut, 9, :D_statistic => 0.0)
+insertcols!(HyDeOut, 10, :D_stat_Zscore => 0.0)
+insertcols!(HyDeOut, 11, :D_stat_pval => 0.0)
 
 setsOfTriplets = size(HyDeOut,1)
 
@@ -84,7 +96,7 @@ for row in 1:setsOfTriplets
         print("the true hybrid is ", string(trueHybrid), "\n")
         print("the hybrid is ", Hybrid)
         
-        if (cmp((string(trueHybrid)),string("[\"", Hybrid, "\"]")) == 1)
+        if (cmp((string(trueHybrid)),string("[\"", Hybrid, "\"]")) == 0)
             print(HyDeOut[row, :HyDeHybrid])
             HyDeOut[row, :HybridCorrectID] = 2
             if (HyDeOut[row, :HyDeHybrid] .== 1)
@@ -95,23 +107,22 @@ for row in 1:setsOfTriplets
             HyDeOut[row, :HybridCorrectID] = 0
         end
     end
+
+    # calculate D-statistics, p-values, z-score with guidance from cecile ane's calcD script
+    ABBA_site=HyDeOut[row,:ABBA]
+    ABAB_site=HyDeOut[row,:ABAB]
+
+    HyDeOut[row, :D_statistic] = (ABBA_site-ABAB_site)/(ABBA_site+ABAB_site)
+    n=ABBA_site+ABAB_site
+    phat=ABBA_site/n
+    HyDeOut[row, :D_stat_Zscore] = (phat-0.5)*sqrt(n)*2
+    HyDeOut[row, :D_stat_pval] = ccdf(Normal(), abs(HyDeOut[row, :D_stat_Zscore]))*2
+
+    # if there is a hybrid, then the D-statistic has successfully recovered it 
+    #   IF HyDeOut[row, :HybridCorrectID] > 0
+    #   AND p-value for d-statistic is sufficiently low.
+
 end
 
 # HyDeOut
 CSV.write(string(outFile), HyDeOut)
-
-# False positives / False Negatives rate
-# false positives are when hyde detects a hybrid relationship where there isn't one
-
-# count all positives where it should be a negative / count all negatives
-#falsePositives = 0
-#allNegatives = 0
-#for row in 1:setsOfTriplets
-#    if string(HyDeOut[row, :HybridTripletExpected]) == string(0)
-#        allNegatives = allNegatives + 1
-#        if string(HyDeOut[row, :HyDeHybrid]) == string(1)
-#            falsePositives = falsePositives + 1
-#        end
-#    end
-# end
-
