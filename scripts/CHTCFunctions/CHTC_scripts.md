@@ -287,32 +287,41 @@ julia simulating-gene-trees.jl n10orange 30 382591
 julia simulating-gene-trees.jl n10orange 100 837666
 julia simulating-gene-trees.jl n10orange 300 925411
 julia simulating-gene-trees.jl n10orange 1000 765303
-#julia simulating-gene-trees.jl n10orange 3000 101123
+julia simulating-gene-trees.jl n10orange 3000 101123
 
 julia simulating-gene-trees.jl n10red 30 498266
 julia simulating-gene-trees.jl n10red 100 896259
 julia simulating-gene-trees.jl n10red 300 120985
 julia simulating-gene-trees.jl n10red 1000 792469
-#julia simulating-gene-trees.jl n10red 3000 110863
+julia simulating-gene-trees.jl n10red 3000 110863
 
 julia simulating-gene-trees.jl n15blue 30 254790
 julia simulating-gene-trees.jl n15blue 100 168904
 julia simulating-gene-trees.jl n15blue 300 578520
 julia simulating-gene-trees.jl n15blue 1000 469980
-#julia simulating-gene-trees.jl n15blue 3000 808631
+julia simulating-gene-trees.jl n15blue 3000 808631
 
 julia simulating-gene-trees.jl n15red 30 987034
 julia simulating-gene-trees.jl n15red 100 291823
 julia simulating-gene-trees.jl n15red 300 746134
 julia simulating-gene-trees.jl n15red 1000 219083
-#julia simulating-gene-trees.jl n15red 3000 487245
+julia simulating-gene-trees.jl n15red 3000 487245
 
 julia simulating-gene-trees.jl n15orange 30 614827
 julia simulating-gene-trees.jl n15orange 100 129368
 julia simulating-gene-trees.jl n15orange 300 123954
 julia simulating-gene-trees.jl n15orange 1000 789102
-#julia simulating-gene-trees.jl n15orange 3000 347796
+julia simulating-gene-trees.jl n15orange 3000 347796
+
+
+julia simulating-gene-trees.jl n25h5 1000 658488
+julia simulating-gene-trees.jl n50h10 1000 94606
+julia simulating-gene-trees.jl n100h20 1000 649239
+
+julia simulating-gene-trees.jl n25h5 5000 772771
+julia simulating-gene-trees.jl n50h10 5000 283575
+julia simulating-gene-trees.jl n100h20 5000 990579
 
 removing the _1 from the output files requires running them with
 
-sed -i '' 's/_1//g' n*
+sed -i '' 's/_1//g' n*tre

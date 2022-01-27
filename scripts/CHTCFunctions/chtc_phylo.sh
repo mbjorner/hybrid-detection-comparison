@@ -182,7 +182,6 @@ rm *_ticr.csv
 # TICR table
 # MSCquartets table
 
-
 rm *_expected.csv
 rm *-gt*
 rm *astral*
