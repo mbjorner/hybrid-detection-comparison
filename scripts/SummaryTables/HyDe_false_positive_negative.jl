@@ -67,9 +67,9 @@ end
 CSV.write(string(trees, "summarytable_withWrongClades_HyDe.csv"), total_false)
 
 
-# Now a bonferroni corrected version: where level is determined by 0.05/ntrials, (30)
+# Now a bonferroni corrected version: where level is determined by 0.05/nrows (number of triplet tests)
 
-bonLevel = 0.05/30;
+
 
 total_false = DataFrame(gene_trees = Float64[],  trial_num = Float64[], seq_length = Float64[], 
                         HyDe_fp = Float64[], HyDe_fn = Float64[], HyDe_tp = Float64[], HyDe_tn = Float64[], HyDe_wrongClade = Float64[])
@@ -78,7 +78,8 @@ for seq_length in seq_lengths
     for num_trees in num_gene_trees
         for file_number in 1:30
             file = DataFrame(CSV.File(string("seq", seq_length, "/", trees, "_n", num_trees, "/", trees,"_", num_trees, "_", file_number, "_", seq_length, "_HyDe.csv")))
-
+            bonLevel = 0.05/size(file,1);
+            
             insertcols!(file, size(file, 2) + 1, :FPB => 0);
             insertcols!(file, size(file, 2) + 1, :FNB => 0);
             insertcols!(file, size(file, 2) + 1, :TPB => 0);
