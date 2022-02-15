@@ -325,3 +325,27 @@ julia simulating-gene-trees.jl n100h20 5000 990579
 removing the _1 from the output files requires running them with
 
 sed -i '' 's/_1//g' n*tre
+
+## Space requirements
+
+The space/memory requirements for running chtc_phylo.sub/chtc_phylo.sh on CHTC depends on both the size of the networks and the number
+of gene trees used.
+
+The memory and disk space can be altered in the following lines:
+
+```bash 
+quest_memory = 64GB
+request_disk = 64GB
+```
+
+For networks of size 10 taxa, 16GB is sufficient for both disk space and memory, up to 1000 gene trees
+For networks of size 10 taxa with more than 1000 gene trees (3000), 32GB is necessary for both memory and disk space.
+
+For networks of size 15 32GB is sufficient for both disk and memory, up to 1000 gene trees.
+For networks of size 15 taxa with more than 1000 gene trees (3000 tested), 64GB is necessary for both memory and disk space.
+
+This space is primarily taken up by the generation of sequences for these trees, as lengths of 500kbp for 3000 gene trees, e.g. 
+requires a larger amount of space than prior tests run for smaller sequence lengths and gene tree numbers.
+
+The generation of networks of 25, 50, and 100 taxa, the larger networks used, will require more space, dependent on the number of
+gene trees tested. So far (27JAN2022), we do not yet have 5000 gene-tree datasets for these, as simulating-gene-trees.jl cannot generate these.

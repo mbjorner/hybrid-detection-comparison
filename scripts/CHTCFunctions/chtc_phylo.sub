@@ -29,6 +29,8 @@ when_to_transfer_output = ON_EXIT
 
 executable = chtc_phylo.sh
 
+# singleNet/n15orange/n15orange-gt$(num_trees)-$(newProcess)-1.tre
+# all_hybs/n$(network)_n$(num_trees)/$(newProcess)_astral.in
 
 transfer_input_files = output/, input/all_hybs/n$(network)_n$(num_trees)/$(newProcess)_astral.in, julia-1.6.1-linux-x86_64.tar.gz,\
     my-project-julia.tar.gz, chtc_TICR.jl, http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz,\
@@ -44,8 +46,9 @@ arguments = $(newProcess)_astral.in $(map) $(network) $(num_trees) $(true_net) $
 # need for cpus, disk, and memory changes
 
 request_cpus = 2
-request_memory = 16GB
-request_disk = 16GB
+# trees >3000 require more memory and disk space; 16gb too low, 32gb too low for 3000.
+request_memory = 64GB
+request_disk = 64GB
 
 # number to run
 queue 30

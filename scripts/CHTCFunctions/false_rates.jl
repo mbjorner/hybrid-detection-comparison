@@ -32,10 +32,10 @@ for num_trees in num_gene_trees
 
         CSV.write(string(trees,"_", num_trees, "_", file_number, "_TICR_MSC_summary_test.csv"), file)
 
-      file = DataFrame(CSV.File(string(trees,"_", num_trees, "_", file_number, "_TICR_MSC_summary_test.csv")))
+        file = DataFrame(CSV.File(string(trees,"_", num_trees, "_", file_number, "_TICR_MSC_summary_test.csv")))
 
 
-       insertcols!(file, size(file, 2) + 1, :TICR_hybrid => 0);
+        insertcols!(file, size(file, 2) + 1, :TICR_hybrid => 0);
         insertcols!(file, size(file, 2) + 1, :TICR_FP => 0);
         insertcols!(file, size(file, 2) + 1, :TICR_FN => 0);
         insertcols!(file, size(file, 2) + 1, :MSC_FP => 0);

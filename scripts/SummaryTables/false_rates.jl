@@ -49,12 +49,6 @@ for num_trees in num_gene_trees
 
             hyb = file[row, :HYB_EX]
 
-            if file[row, :TICR_hybrid] .> hyb
-                file[row, :TICR_FP] = 1
-            elseif file[row, :TICR_hybrid] .< hyb
-                file[row, :TICR_FN] = 1
-            end
-
             if file[row, :MSC_hybrid] .> hyb
                 file[row, :MSC_FP] = 1
             elseif file[row, :MSC_hybrid] .< hyb

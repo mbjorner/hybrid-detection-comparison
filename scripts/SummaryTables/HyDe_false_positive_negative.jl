@@ -28,6 +28,14 @@ for net_names in network_names
             insertcols!(file, size(file, 2) + 1, :TN => 0);
             insertcols!(file, size(file, 2) + 1, :WC => 0);
 
+            insertcols!(file, size(file, 2) + 1, :FP_Dstat => 0);
+            insertcols!(file, size(file, 2) + 1, :FN_Dstat => 0);
+            insertcols!(file, size(file, 2) + 1, :TP_Dstat => 0);
+            insertcols!(file, size(file, 2) + 1, :TN_Dstat => 0);
+            insertcols!(file, size(file, 2) + 1, :WC_Dstat => 0);
+
+            # TODO: need to add D-statistic summary statistics
+
             for row in 1:size(file, 1)
                 
                 HybPredicted = file[row, :HyDeHybrid]
@@ -63,6 +71,12 @@ for net_names in network_names
             HyDe_TN = sum(file[!, :TN])
             HyDe_WC = sum(file[!, :WC])
 
+            Dstat_FP = sum(file[!, :FP_Dstat])
+            Dstat_FN = sum(file[!, :FN_Dstat])
+            Dstat_TP = sum(file[!, :TP_Dstat])
+            Dstat_TN = sum(file[!, :TN_Dstat])
+            Dstat_WC = sum(file[!, :WC_Dstat])
+
             global total_false
             push!(total_false, [num_trees, file_number, seq_length, HyDe_FP, HyDe_FN, HyDe_TP, HyDe_TN, HyDe_WC])
         end 
@@ -95,6 +109,12 @@ for seq_length in seq_lengths
                 insertcols!(file, size(file, 2) + 1, :TNB => 0);
                 insertcols!(file, size(file, 2) + 1, :WCB => 0);
 
+                insertcols!(file, size(file, 2) + 1, :FPB_Dstat => 0);
+                insertcols!(file, size(file, 2) + 1, :FNB_Dstat => 0);
+                insertcols!(file, size(file, 2) + 1, :TPB_Dstat => 0);
+                insertcols!(file, size(file, 2) + 1, :TNB_Dstat => 0);
+                insertcols!(file, size(file, 2) + 1, :WCB_Dstat => 0);
+
                 for row in 1:size(file, 1)
                 
                     pValHybrid = file[row, :Pvalue];
@@ -113,7 +133,7 @@ for seq_length in seq_lengths
                         else
                             file[row, :FPB] = 1
                         end
-                    elseif HybPredicted .== 0
+                    elseif pValHybrid .> bonLevel
                         if HybTriple .== 1
                             if HybIDCorrect .== 2
                                 file[row, :FNB] = 1
@@ -124,6 +144,35 @@ for seq_length in seq_lengths
                             file[row, :TNB] = 1
                         end
                     end
+
+                    # if there is a hybrid, then the D-statistic has successfully recovered it 
+                    #   IF HyDeOut[row, :HybridCorrectID] > 0
+                    #   AND p-value for d-statistic is sufficiently low.
+                    
+                    D_stat_p = file[row, :D_stat_pval];
+
+                    if D_stat_p .<= bonLevel
+                        if HybTriple .== 1
+                            if HybIDCorrect .== 1
+                                file[row, :TPB_Dstat] = 1
+                            else
+                                file[row, :WCB_Dstat] = 1 #wrong clade is also a "false positive" type result
+                            end
+                        else
+                            file[row, :FPB_Dstat] = 1
+                        end
+                    elseif D_stat_p .> bonLevel
+                        if HybTriple .== 1
+                            if HybIDCorrect .== 2
+                                file[row, :FNB_Dstat] = 1
+                            else
+                                file[row, :TNB_Dstat] = 1
+                            end
+                        else
+                            file[row, :TNB_Dstat] = 1
+                        end
+                    end
+
                 end
 
                 HyDe_FP = sum(file[!, :FPB])
@@ -131,6 +180,12 @@ for seq_length in seq_lengths
                 HyDe_TP = sum(file[!, :TPB])
                 HyDe_TN = sum(file[!, :TNB])
                 HyDe_WC = sum(file[!, :WCB])
+
+                Dstat_FP = sum(file[!, :FPB_Dstat])
+                Dstat_FN = sum(file[!, :FNB_Dstat])
+                Dstat_TP = sum(file[!, :TPB_Dstat])
+                Dstat_TN = sum(file[!, :TNB_Dstat])
+                Dstat_WC = sum(file[!, :WCB_Dstat])
 
                 global total_false
                 push!(total_false, [num_trees, file_number, seq_length, HyDe_FP, HyDe_FN, HyDe_TP, HyDe_TN, HyDe_WC])
