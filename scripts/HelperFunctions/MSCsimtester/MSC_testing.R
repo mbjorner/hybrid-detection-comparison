@@ -64,15 +64,17 @@ library(MSCsimtester)
 library(ape)
 library(kSamples)
 
-setwd("~/GitHub/phylo-microbes/data/knownGT/multiNet/")
-geneTreeFile = "n10_n1000/10_astral.in"
+setwd("~/GitHub/phylo-microbes/data/knownGT/singleNet/n15orange/")
+geneTreeFile = "n15orange-gt1000-10-1.tre"
 
-geneTreeFile = "10_astral.in"
 gts = read.tree(geneTreeFile);
-sp_tree = read.tree(text="(10:9.6,(1:7.2,(2:6.0,(9:5.4,(3:4.4,(4:3.5,((5:0.2,6:0.2)I1:2.1,(7:1.4,8:1.4)I3:0.9)I4:1.2)I5:0.9)I6:1.0)I7:0.6)I8:1.2)I9:2.4)I10;")
-sp_tree$edge.length=sp_tree$edge.length/2
 
-popSizes=c(0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5)
+sp_tree = read.tree(text="(15:11.0,(1:10.0,(14:8.0,(((7:2.8,(10:1.6,(9:0.4,8:0.4)I1:1.2)I2:1.2)I3:0.8,(11:2.8,(13:0.4,12:0.4)I4:2.4)I5:0.8)I6:3.4)I7:1.0)I8:1.2,(((2:0.4,3:0.4)I9:5.2,((4:3.6,5:3.6)I10:1.2,6:4.8)I11:0.8)I12:3.6)I13:0.8)I14:1.0)I15;")
+#sp_tree$edge.length=sp_tree$edge.length/2
+
+# 19 for N10, 30 for N15
+popSizes=c(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
+#popSizes=c(0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5)
 
 taxon1 = "1"
 taxon2 = "2"
