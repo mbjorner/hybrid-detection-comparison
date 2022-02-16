@@ -3,11 +3,11 @@
 
 using QuartetNetworkGoodnessFit, DataFrames, CSV, PhyloNetworks
 
-cd("/Users/bjorner/GitHub/phylo-microbes/output/output_HyDe_seqvariants/")
-trees="n15"
+cd("/Users/bjorner/GitHub/phylo-microbes/output/2022FEB15_output_alln10_n15/")
 
-total_false = DataFrame(gene_trees = Float64[],  trial_num = Float64[], seq_length = Float64[], 
-                        HyDe_fp = Float64[], HyDe_fn = Float64[], HyDe_tp = Float64[], HyDe_tn = Float64[], HyDe_wrongClade = Float64[])
+total_false = DataFrame(network_name = String[], gene_trees = Float64[],  trial_num = Float64[], seq_length = Float64[], 
+                        HyDe_fp = Float64[], HyDe_fn = Float64[], HyDe_tp = Float64[], HyDe_tn = Float64[], HyDe_wrongClade = Float64[],
+                        Dstat_fp = Float64[], Dstat_fn = Float64[], Dstat_tp = Float64[], Dstat_tn = Float64[], Dstat_wc = Float64[])
 
 network_names = ["n10","n10orange","n10red","n15","n15blue","n15orange","n15red"]
 
@@ -63,6 +63,31 @@ for net_names in network_names
                         file[row, :TN] = 1
                     end
                 end
+
+                D_stat_p = file[row, :D_stat_pval];
+
+                if D_stat_p .<= 0.05
+                    if HybTriple .== 1
+                        if HybIDCorrect .== 1
+                            file[row, :TP_Dstat] = 1
+                        else
+                            file[row, :WC_Dstat] = 1 #wrong clade is also a "false positive" type result
+                        end
+                    else
+                        file[row, :FP_Dstat] = 1
+                    end
+                elseif D_stat_p .> 0.05
+                    if HybTriple .== 1
+                        if HybIDCorrect .== 2
+                            file[row, :FN_Dstat] = 1
+                        else
+                            file[row, :TN_Dstat] = 1
+                        end
+                    else
+                        file[row, :TN_Dstat] = 1
+                    end
+                end
+
             end
 
             HyDe_FP = sum(file[!, :FP])
@@ -78,21 +103,23 @@ for net_names in network_names
             Dstat_WC = sum(file[!, :WC_Dstat])
 
             global total_false
-            push!(total_false, [num_trees, file_number, seq_length, HyDe_FP, HyDe_FN, HyDe_TP, HyDe_TN, HyDe_WC])
+            push!(total_false, [net_names, num_trees, file_number, seq_length, HyDe_FP, HyDe_FN, HyDe_TP, HyDe_TN, HyDe_WC, 
+                                Dstat_FP, Dstat_FN, Dstat_TP, Dstat_TN, Dstat_WC])
         end 
     end
 end
 end
 
-CSV.write(string(trees, "summarytable_withWrongClades_HyDe.csv"), total_false)
+CSV.write(string("2022FEB15summarytable_withWrongClades_HyDe.csv"), total_false)
 
 
 # Now a bonferroni corrected version: where level is determined by 0.05/nrows (number of triplet tests)
 
 
 
-total_false = DataFrame(gene_trees = Float64[],  trial_num = Float64[], seq_length = Float64[], 
-                        HyDe_fp = Float64[], HyDe_fn = Float64[], HyDe_tp = Float64[], HyDe_tn = Float64[], HyDe_wrongClade = Float64[])
+total_false_bf = DataFrame(network_name = String[], gene_trees = Float64[],  trial_num = Float64[], seq_length = Float64[], 
+                        HyDe_fp = Float64[], HyDe_fn = Float64[], HyDe_tp = Float64[], HyDe_tn = Float64[], HyDe_wrongClade = Float64[],
+                        Dstat_fp = Float64[], Dstat_fn = Float64[], Dstat_tp = Float64[], Dstat_tn = Float64[], Dstat_wc = Float64[])
 for seq_length in seq_lengths
     for net_names in network_names
         net_num = net_names[1:3]
@@ -187,10 +214,12 @@ for seq_length in seq_lengths
                 Dstat_TN = sum(file[!, :TNB_Dstat])
                 Dstat_WC = sum(file[!, :WCB_Dstat])
 
-                global total_false
-                push!(total_false, [num_trees, file_number, seq_length, HyDe_FP, HyDe_FN, HyDe_TP, HyDe_TN, HyDe_WC])
+                global total_false_bf
+                push!(total_false_bf, [net_names, num_trees, file_number, seq_length, HyDe_FP, HyDe_FN, HyDe_TP, HyDe_TN, HyDe_WC, 
+                                    Dstat_FP, Dstat_FN, Dstat_TP, Dstat_TN, Dstat_WC])
             end 
         end
     end
+end
 
-CSV.write(string(trees, "summarytable_withWrongClades_BonferroniCorrected_HyDe.csv"), total_false)
+CSV.write(string("2022FEB15summarytable_withWrongClades_BonferroniCorrected_HyDe.csv"), total_false_bf)
