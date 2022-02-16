@@ -19,7 +19,7 @@ MSC_results_alphaBonferroni = DataFrame(network = String[], gene_trees = Float64
                         FP=Float64[], FN=Float64[], TP=Float64[], TN=Float64[])
 
 # Step 1: navigate to overall directory containing results
-cd("/Users/bjorner/GitHub/phylo-microbes/output/output_ticr")
+cd("/Users/bjorner/GitHub/phylo-microbes/output/2022FEB15_output_alln10_n15/")
 
 
 network_names = ["n10","n10orange","n10red","n15","n15blue","n15orange","n15red"]
@@ -89,6 +89,6 @@ for net_names in network_names
     end
 end 
 
-CSV.write(string("MSCQuartets_results_alphaBonferroni.csv"), MSC_results_alphaBonferroni)
-CSV.write(string("MSCQuartets_results_alpha05.csv"), MSC_results_alpha05)
-CSV.write(string("TICR_results_withQMC.csv"), ticrPOverall)
+CSV.write(string("2022FEB15_MSCQuartets_results_alphaBonferroni.csv"), MSC_results_alphaBonferroni)
+CSV.write(string("2022FEB15_MSCQuartets_results_alpha05.csv"), MSC_results_alpha05)
+CSV.write(string("2022FEB15_TICR_results_withQMC.csv"), ticrPOverall)
