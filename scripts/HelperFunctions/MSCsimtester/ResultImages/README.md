@@ -50,3 +50,5 @@ HyDe_four_taxon
 - edge lengths multiplied by two
 - taxa P1_1, P2_1, HYB_1 used
 - long_mix0-gt1000-1-1.tre
+
+With the above parameters used for the described gene tree and rooted species tree inputs, they match the expected values, represented by the blue line.

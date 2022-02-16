@@ -64,21 +64,24 @@ library(MSCsimtester)
 library(ape)
 library(kSamples)
 
-setwd("~/GitHub/phylo-microbes/data/knownGT/singleNet/n15orange/")
-geneTreeFile = "n15orange-gt1000-10-1.tre"
+setwd("~/GitHub/phylo-microbes/data/HyDe_four_taxon/long_branches/long_mix0/")
+geneTreeFile = "long_mix0-gt1000-1-1.tre"
 
 gts = read.tree(geneTreeFile);
 
-sp_tree = read.tree(text="(15:11.0,(1:10.0,(14:8.0,(((7:2.8,(10:1.6,(9:0.4,8:0.4)I1:1.2)I2:1.2)I3:0.8,(11:2.8,(13:0.4,12:0.4)I4:2.4)I5:0.8)I6:3.4)I7:1.0)I8:1.2,(((2:0.4,3:0.4)I9:5.2,((4:3.6,5:3.6)I10:1.2,6:4.8)I11:0.8)I12:3.6)I13:0.8)I14:1.0)I15;")
-#sp_tree$edge.length=sp_tree$edge.length/2
+sp_tree = read.tree(text="(O_1:1.0,((P1_1:0.25)I1:0.25,(P2_1:0.25,HYB_1:0.25)I2:0.25)I3:0.5)I4;")
+sp_tree$edge.length=sp_tree$edge.length*2
 
-# 19 for N10, 30 for N15
-popSizes=c(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
+# 19 for N10, 30 for N15 
+#popSizes=c(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
 #popSizes=c(0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5)
+popSizes=rep(c(1),each=8)
 
-taxon1 = "1"
-taxon2 = "2"
-taxon3 = "3"
+
+
+taxon1 = "P1_1"
+taxon2 = "P2_1"
+taxon3 = "HYB_1"
 
 distDensities = pairwiseDist(sp_tree, popSizes, gts, taxon1, taxon2, numSteps = 1000,
                              tailProb = 0.01)
