@@ -3,6 +3,8 @@ data/*
 *.in
 *.tre
 
+output/*
+
 # Compiled source #
 ###################
 *.com
