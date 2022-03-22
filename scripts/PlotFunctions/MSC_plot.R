@@ -28,8 +28,8 @@ summary_MSC <- MSC_counts %>% summarise(
   false_positives = mean(FP),
   true_negatives = mean(TN),
   true_positives = mean(TP),
-  false_neg_rate = mean(FN) / (mean(FN) + mean(TP)), 
-  false_pos_rate = mean(FP) / (mean(FP) + mean(TN))
+  false_neg_rate = mean(FN) / (mean(TP)), 
+  false_pos_rate = mean(FP) / (mean(TN))
 )
 
 # goal is now to plot the summary_MSC that we have created with false positive 
@@ -37,7 +37,7 @@ summary_MSC <- MSC_counts %>% summarise(
 toString(summary_MSC$gene_trees)
 
 ggplot(data = summary_MSC, mapping = aes(x = network, y = false_neg_rate, fill=factor(gene_trees))) +
-  geom_bar(position="dodge",stat="identity")
+  geom_bar(position="dodge",stat="identity") + ggtitle("MSC False Negative Rate") + ylab("False Negative Rate") + xlab("Networks")
 
 ggplot(data = summary_MSC, mapping = aes(x = network, y = false_pos_rate, fill=factor(gene_trees))) +
-  geom_bar(position="dodge",stat="identity")
+  geom_bar(position="dodge",stat="identity") + ggtitle("MSC False Positive Rate") + ylab("False Positive Rate") + xlab("Networks")

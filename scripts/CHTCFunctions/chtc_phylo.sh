@@ -130,7 +130,7 @@ HyDeOutName=$5_n$3_$4_${num_trial}_${i}_HyDe_Dstat.csv
 julia --project=my-project-julia chtc_HyDe_Dstat_table.jl ${HyDeOut} ${true_network} ${significance} ${HyDeOutName}
 done
 
-rm *HyDe-out*txt
+# rm *HyDe-out*txt
 
 # in order to use quartet max cut, it needs an input that is produced by the script
    julia --project=my-project-julia chtc_cfTable.jl $1
@@ -141,7 +141,9 @@ rm *HyDe-out*txt
 
    TICROut=$5_n$3_$4_${num_trial}_ticr.csv
    julia --project=my-project-julia chtc_TICR.jl $1 $1.QMC.tre ${TICROut}
-   julia --project=my-project-julia chtc_TICR.jl $1 $5 ${TICROut}
+
+# compares to the true network   
+# julia --project=my-project-julia chtc_TICR.jl $1 $5 ${TICROut}
 
 #outputs: table of obsCF printed to file tableCF.txt, desciptive stat of input data printed to file summaryTreesQuartets.txt
 
@@ -184,7 +186,7 @@ rm *_ticr.csv
 
 rm *_expected.csv
 rm *-gt*
-rm *astral*
+# rm *astral*
 
 
 

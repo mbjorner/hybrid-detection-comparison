@@ -49,7 +49,7 @@ cd $WORKDIR
 for j in 50000 100000 250000 500000
 do
    seqgen_out=${j}_${gene_trees}_${network}_seqgen.out
-   ./Seq-Gen-1.3.4/source/seq-gen -mGTR -r 1.0 0.2 10.0 0.75 3.2 1.6 -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -l${j} -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_seqgen.log
+   ./Seq-Gen-1.3.4/source/seq-gen -mGTR -r 1.0 0.2 10.0 0.75 3.2 1.6 -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -s0.018 -n1  -l${j} -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_seqgen.log
    
    # OLD PARAMS
    # -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l${j} -s0.018 -n1 -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log

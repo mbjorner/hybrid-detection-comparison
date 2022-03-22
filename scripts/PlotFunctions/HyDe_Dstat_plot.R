@@ -1,5 +1,5 @@
 # Marianne Bjorner 15FEB2022
-# input: MSC summary table
+# input: hyDe summary table
 # output: plots with false positive and negative rate plotted by network, 
 # number of gene trees, and sequence length.
 
@@ -51,19 +51,124 @@ n10summary = summary_HyDe[summary_HyDe$network_name == "n10", ]
 n10redsummary = summary_HyDe[summary_HyDe$network_name == "n10red", ] 
 n10orangesummary = summary_HyDe[summary_HyDe$network_name == "n10orange", ] 
 
+n15summary = summary_HyDe[summary_HyDe$network_name == "n15", ] 
+n15redsummary = summary_HyDe[summary_HyDe$network_name == "n15red", ] 
+n15orangesummary = summary_HyDe[summary_HyDe$network_name == "n15orange", ] 
+n15bluesummary = summary_HyDe[summary_HyDe$network_name == "n15blue", ] 
 
+######## n10 summary tables
 ggplot(data = n10summary, mapping = aes(x = gene_trees, y = hyde_false_neg_rate, color=factor(seq_length))) +
-  geom_line() +geom_point();
+  geom_line() +geom_point() + ylab("False Negative Rate") + xlab("Number of Gene Trees") + ggtitle("N10H2 HyDe False Negative Rates") +
+  theme_classic();
 
 ggplot(data = n10summary, mapping = aes(x = gene_trees, y = hyde_false_pos_rate, color=factor(seq_length))) +
-  geom_line() +geom_point();
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") + ggtitle("N10H2 HyDe False Positive Rates") + theme_classic();
+
+ggplot(data = n10redsummary, mapping = aes(x = gene_trees, y = hyde_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negative Rate") + xlab("Number of Gene Trees") + ggtitle("N10red HyDe False Negative Rates") + theme_classic();
+
+ggplot(data = n10redsummary, mapping = aes(x = gene_trees, y = hyde_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") + ggtitle("N10red HyDe False Positive Rates")+ theme_classic();
+
+ggplot(data = n10orangesummary, mapping = aes(x = gene_trees, y = hyde_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negative Rate") + xlab("Number of Gene Trees") + ggtitle("N10orange HyDe False Negative Rates")+theme_classic();
+
+ggplot(data = n10orangesummary, mapping = aes(x = gene_trees, y = hyde_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") + ggtitle("N10orange HyDe False Positive Rates")+theme_classic();
+
+
+######### n15 summary tables
+ggplot(data = n15summary, mapping = aes(x = gene_trees, y = hyde_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negative Rate") + xlab("Number of Gene Trees") + ggtitle("N15H3 HyDe False Negative Rates")+theme_classic();
+
+ggplot(data = n15summary, mapping = aes(x = gene_trees, y = hyde_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") + ggtitle("N15H3 HyDe False Positive Rates")+theme_classic();
+
+ggplot(data = n15redsummary, mapping = aes(x = gene_trees, y = hyde_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negative Rate") + xlab("Number of Gene Trees") + ggtitle("N15red HyDe False Negative Rates")+theme_classic();
+
+ggplot(data = n15redsummary, mapping = aes(x = gene_trees, y = hyde_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") + ggtitle("N15red HyDe False Positive Rates")+theme_classic();
+
+ggplot(data = n15orangesummary, mapping = aes(x = gene_trees, y = hyde_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negative Rate") + xlab("Number of Gene Trees") + ggtitle("N15orange HyDe False Negative Rates")+theme_classic();
+
+ggplot(data = n15orangesummary, mapping = aes(x = gene_trees, y = hyde_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") + ggtitle("N15orange HyDe False Positive Rates")+theme_classic();
+
+ggplot(data = n15bluesummary, mapping = aes(x = gene_trees, y = hyde_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negative Rate") + xlab("Number of Gene Trees") + ggtitle("N15blue HyDe False Negative Rates")+theme_classic();
+
+ggplot(data = n15bluesummary, mapping = aes(x = gene_trees, y = hyde_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") + ggtitle("N15blue HyDe False Positive Rates")+theme_classic();
+
 
 n10summary_d = summary_Dstat[summary_Dstat$network_name == "n10", ] 
 n10redsummary_d = summary_Dstat[summary_Dstat$network_name == "n10red", ] 
 n10orangesummary_d = summary_Dstat[summary_Dstat$network_name == "n10orange", ]
 
+n15summary_d = summary_Dstat[summary_Dstat$network_name == "n15", ] 
+n15redsummary_d = summary_Dstat[summary_Dstat$network_name == "n15red", ] 
+n15orangesummary_d = summary_Dstat[summary_Dstat$network_name == "n15orange", ]
+n15bluesummary_d = summary_Dstat[summary_Dstat$network_name == "n15blue", ]
+
+
+#### N10 summary
 ggplot(data = n10summary_d, mapping = aes(x = gene_trees, y = d_false_neg_rate, color=factor(seq_length))) +
-  geom_line() +geom_point();
+  geom_line() +geom_point() + ylab("False Negaitve Rate") + xlab("Number of Gene Trees") + 
+  ggtitle("N10H2 D-Statistic False Negative Rates") + theme_classic();
 
 ggplot(data = n10summary_d, mapping = aes(x = gene_trees, y = d_false_pos_rate, color=factor(seq_length))) +
-  geom_line() + geom_point();
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") + 
+  ggtitle("N10H2 D-Statistic False Positive Rates")+ theme_classic();
+
+ggplot(data = n10redsummary_d, mapping = aes(x = gene_trees, y = d_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negaitve Rate") + xlab("Number of Gene Trees") + 
+  ggtitle("N10red D-Statistic False Negative Rates")+theme_classic();
+
+ggplot(data = n10redsummary_d, mapping = aes(x = gene_trees, y = d_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") + 
+  ggtitle("N10red D-Statistic False Positive Rates")+theme_classic();
+
+ggplot(data = n10orangesummary_d, mapping = aes(x = gene_trees, y = d_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negaitve Rate") + xlab("Number of Gene Trees") +
+  ggtitle("N10orange D-Statistic False Negative Rates")+theme_classic();
+
+ggplot(data = n10orangesummary_d, mapping = aes(x = gene_trees, y = d_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") + 
+  ggtitle("N10orange D-Statistic False Positive Rates")+theme_classic();
+
+
+
+###### N15 summary
+ggplot(data = n15summary_d, mapping = aes(x = gene_trees, y = d_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negaitve Rate") + xlab("Number of Gene Trees") + 
+  ggtitle("N15H3 D-Statistic False Negative Rates")+theme_classic();
+
+ggplot(data = n15summary_d, mapping = aes(x = gene_trees, y = d_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") + 
+  ggtitle("N15H3 D-Statistic False Positive Rates")+theme_classic();
+
+ggplot(data = n15redsummary_d, mapping = aes(x = gene_trees, y = d_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negaitve Rate") + xlab("Number of Gene Trees") +
+  ggtitle("N15red D-Statistic False Negative Rates")+theme_classic();
+
+ggplot(data = n15redsummary_d, mapping = aes(x = gene_trees, y = d_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") +
+  ggtitle("N15red D-Statistic False Positive Rates")+theme_classic();
+
+ggplot(data = n15orangesummary_d, mapping = aes(x = gene_trees, y = d_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negaitve Rate") + xlab("Number of Gene Trees") +
+  ggtitle("N15orange D-Statistic False Negative Rates")+theme_classic();
+
+ggplot(data = n15orangesummary_d, mapping = aes(x = gene_trees, y = d_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") +
+  ggtitle("N15orange D-Statistic False Positive Rates")+theme_classic();
+
+ggplot(data = n15bluesummary_d, mapping = aes(x = gene_trees, y = d_false_neg_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Negaitve Rate") + xlab("Number of Gene Trees") +
+  ggtitle("N15blue D-Statistic False Negative Rates")+theme_classic();
+
+ggplot(data = n15bluesummary_d, mapping = aes(x = gene_trees, y = d_false_pos_rate, color=factor(seq_length))) +
+  geom_line() +geom_point() + ylab("False Positive Rate") + xlab("Number of Gene Trees") +
+  ggtitle("N15blue D-Statistic False Positive Rates")+theme_classic();

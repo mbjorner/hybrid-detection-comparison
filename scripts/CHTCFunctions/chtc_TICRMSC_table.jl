@@ -5,8 +5,11 @@
 #        1 expected quartet file
 #        2 TICR output
 #        3 MSCQuartets output
+#        4 alpha level
+#        5 True Network file
+#        6 outfle name
 
-# output: 
+# output: summary table for a single trial of TICR and MSCquartets with accuracy.
 
 
 # exec '/Applications/Julia-1.5.app/Contents/Resources/julia/bin/julia'
@@ -16,6 +19,7 @@ using QuartetNetworkGoodnessFit, DataFrames, CSV, PhyloNetworks
 TicrOut = DataFrame(CSV.File(ARGS[2]))
 Expected = DataFrame(CSV.File(ARGS[1]))
 MSCOut = DataFrame(CSV.File(ARGS[3]))
+netFile = ARGS[5]
 
 alpha = ARGS[4]
 
@@ -34,14 +38,46 @@ insertcols!(TicrOut, size(TicrOut, 2) + 1, :overallPvalue => overallPval)
 
 #create new matrix of size size(expectedVals, 1)
 hybridExpected = Vector{Bool}(undef, size(expectedVals, 1))
-for i in 1:size(expectedVals, 1) #for number of rows
-    if (expectedVals[i,1] .== expectedVals[i,2] || expectedVals[i,2] .== expectedVals[i,3] || expectedVals[i,1] .== expectedVals[i,3])
-        result = 0
+
+setsOfQuartets = size(TicrOut,1)
+
+for row in 1:setsOfQuartets
+    # extract the quartet that it tells you
+
+    net = readTopologyLevel1(netFile);
+    T1 = string(TicrOut[row, :t1]);
+    T2 = string(TicrOut[row, :t2]);
+    T3 = string(TicrOut[row, :t3]);
+    T4 = string(TicrOut[row, :t4])
+    quartet = [T1,T2,T3,T4];
+
+    for l in tipLabels(net)
+        if l ∉ quartet
+            PhyloNetworks.deleteleaf!(net,l, keeporiginalroot=true);
+            #@show net
+        end 
+    end 
+
+    #plot(net,:R)
+
+    print("The number of hybrids leftover in the net is ", string(net.numHybrids), "\n")
+
+    if net.numHybrids > 0 # then the triplets contain a hybrid relationship
+        hybridExpected[row] = 1;
     else
-        result = 1
+        hybridExpected[row] = 0;
     end
-    hybridExpected[i] = result
 end
+
+
+#for i in 1:size(expectedVals, 1) #for number of rows
+#    if (expectedVals[i,1] .== expectedVals[i,2] || expectedVals[i,2] .== expectedVals[i,3] || expectedVals[i,1] .== expectedVals[i,3])
+#        result = 0
+#    else
+#        result = 1
+#    end
+#    hybridExpected[i] = result
+#end
 
 insertcols!(TicrOut, size(TicrOut, 2) + 1, :hybridExpected => hybridExpected)
 
@@ -91,7 +127,7 @@ for row in 1:setsOfQuartets
             else
                 hybrid = 0
             end
-            println("here")
+
             global MSCDF
             global MSCOut
             MSCDF = push!(MSCDF, [MSCOut[rowMSC, CF1234], MSCOut[rowMSC, CF1324], MSCOut[rowMSC, CF1423], MSCOut[rowMSC, pVal], hybrid])
@@ -110,26 +146,4 @@ insertcols!(TicrOut, size(TicrOut, 2) + 1, :MSC_hybrid => MSCDF[:,5])
 
 # save output to CSV file
 
-CSV.write(string(ARGS[5]), TicrOut)
- 
-
-
-# print rows where isHybrid (TICR), hybridExpected (expected (real)), OR MSC hybrid are 1
-# false positive / false negative rates
-
-# MSCquartets
-# falsePositivesTICR = 0
-#falsePositivesMSC = 0
-#allNegatives = 0
-#for row in 1:setsOfQuartets
-#    if string(TicrOut[row, :HybridExpected]) == string(0)
-#        allNegatives = allNegatives + 1
-##        if string(TicrOut[row, :MSC_hybrid]) == string(1)
-#            falsePositivesMSC = falsePositivesMSC + 1
-#        end
-#        if string(TicrOut[row, :isHybrid]) == string("TRUE")
-#            falsePositivesTICR = FalsePositivesTICR + 1
-#        end
-#    end
-# end
-
+CSV.write(string(ARGS[6]), TicrOut)

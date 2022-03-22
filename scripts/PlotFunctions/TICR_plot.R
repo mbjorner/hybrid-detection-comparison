@@ -33,7 +33,8 @@ summary_TICR <- TICR_counts %>% summarise(
 # goal is now to plot the summary_TICR that we have created 
 
 ggplot(data = summary_TICR, mapping = aes(x = network, y = numSignificantAlpha, fill=factor(gene_trees))) +
-  geom_bar(position="dodge",stat="identity")
+  geom_bar(position="dodge",stat="identity") + ylab("number of trials (of 30) with significant results") + 
+  xlab("Number of Gene Trees") + ggtitle("Number of tests rejecting true network");
 
 ggplot(data = summary_TICR, mapping = aes(x = network, y = numSignificantBonferroni, fill=factor(gene_trees))) +
   geom_bar(position="dodge",stat="identity")

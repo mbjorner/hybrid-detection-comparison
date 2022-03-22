@@ -42,4 +42,4 @@ request_memory = 16GB
 request_disk = 16GB
 
 # number to run
-queue process from long_branch_files.txt
+queue process from short_branch_files.txt
