@@ -43,22 +43,34 @@ for net_names in network_names
 
                 insertcols!(file, size(file, 2) + 1, :MSC_FP => 0);
                 insertcols!(file, size(file, 2) + 1, :MSC_FN => 0);
+                insertcols!(file, size(file, 2) + 1, :MSC_TP => 0);
+                insertcols!(file, size(file, 2) + 1, :MSC_TN => 0);
                 insertcols!(file, size(file, 2) + 1, :HYB_EX => convert.(Int64, file[!, :hybridExpected]));
 
                 for row in 1:size(file, 1)
                     hyb = file[row, :HYB_EX]
                     alpha = 0.05/size(file,1)
-                    if file[row, :MSC_pVal] .< hyb*alpha
-                        file[row, :MSC_FP] = 1
-                    elseif file[row, :MSC_pVal] .> hyb*alpha
-                        file[row, :MSC_FN] = 1
+                    if file[row, :MSC_pVal] .< alpha
+                        if hyb == 0
+                            file[row, :MSC_FP] = 1
+                        else # hyb == 1
+                            file[row, :MSC_TP] = 1
+                        end
+                    elseif file[row, :MSC_pVal] .> alpha
+                        if hyb == 1
+                            file[row, :MSC_FN] = 1
+                        else # hyb == 0
+                            file[row, :MSC_FP] = 1
+                        end
                     end
                 end
 
                 MSC_FP = sum(file[!, :MSC_FP])
                 MSC_FN = sum(file[!, :MSC_FN])
-                TRUE_POS = sum(file[!, :HYB_EX])
-                TRUE_NEG = size(file, 1) - TRUE_POS
+                TRUE_POS = sum(file[!, :MSC_TP])
+                TRUE_NEG = sum(file[!, :MSC_TN])
+                # TRUE_POS = sum(file[!, :HYB_EX])
+                # TRUE_NEG = size(file, 1) - TRUE_POS
                 
                 global MSC_results_alphaBonferroni
                 push!(MSC_results_alphaBonferroni, [net_names, num_trees, file_number, MSC_FP, MSC_FN, TRUE_POS, TRUE_NEG])
@@ -68,10 +80,20 @@ for net_names in network_names
                     alpha = 0.05
                     file[row, :MSC_FP] = 0
                     file[row, :MSC_FN] = 0
-                    if file[row, :MSC_pVal] .< hyb*alpha
-                        file[row, :MSC_FP] = 1
-                    elseif file[row, :MSC_pVal] .> hyb*alpha
-                        file[row, :MSC_FN] = 1
+                    file[row, :MSC_TP] = 0
+                    file[row, :MSC_TN] = 0
+                    if file[row, :MSC_pVal] .< alpha
+                        if hyb == 0
+                            file[row, :MSC_FP] = 1
+                        else 
+                            file[row, :MSC_TP] = 1
+                        end
+                    elseif file[row, :MSC_pVal] .> alpha
+                        if hyb == 1
+                            file[row, :MSC_FN] = 1
+                        else
+                            file[row, :MSC_TN] = 1
+                        end
                     end
                 end
 
@@ -89,6 +111,6 @@ for net_names in network_names
     end
 end 
 
-CSV.write(string("2022FEB15_MSCQuartets_results_alphaBonferroni.csv"), MSC_results_alphaBonferroni)
-CSV.write(string("2022FEB15_MSCQuartets_results_alpha05.csv"), MSC_results_alpha05)
-CSV.write(string("2022FEB15_TICR_results_withQMC.csv"), ticrPOverall)
+CSV.write(string("2022FEB15_MSCQuartets_results_alphaBonferroni_corr.csv"), MSC_results_alphaBonferroni)
+CSV.write(string("2022FEB15_MSCQuartets_results_alpha05_corr.csv"), MSC_results_alpha05)
+CSV.write(string("2022FEB15_TICR_results_withoutQMC_corr.csv"), ticrPOverall)

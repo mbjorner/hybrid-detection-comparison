@@ -186,7 +186,7 @@ rm *_ticr.csv
 
 rm *_expected.csv
 rm *-gt*
-# rm *astral*
+rm *astral*
 
 
 
