@@ -36,7 +36,7 @@ transfer_input_files = output/, input/all_hybs/n$(network)_n$(num_trees)/$(newPr
     my-project-julia.tar.gz, chtc_TICR.jl, http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz,\
     packages.tar.gz, chtc_MSCquartets.R, http://proxy.chtc.wisc.edu/SQUID/bjorner/HyDe.tar.gz,\
     run_hyde.py, $(map), Seq-Gen-1.3.4.tar.gz, $(true_net), TICR.tar.gz, chtc_cfTable.jl, find-cut-Linux-64,\
-    chtc_expected_cfTable.jl, chtc_HyDe_Dstat_table.jl, chtc_TICRMSC_table.jl
+    chtc_expected_cfTable.jl, chtc_HyDe_Dstat_table.jl, chtc_TICRMSC_table.jl, seqgen2hyde.py
 
 ### arguments: input file, map, network,    e.g. n15orange-gt$(num_trees)-$(newProcess)-1.tre
 arguments = $(newProcess)_astral.in $(map) $(network) $(num_trees) $(true_net) $(newProcess) 

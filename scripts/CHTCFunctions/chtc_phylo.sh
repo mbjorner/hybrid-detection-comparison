@@ -51,6 +51,7 @@ do
    seqgen_out=${j}_${gene_trees}_${network}_${num_gene_trees}_seqgen.out
    ./Seq-Gen-1.3.4/source/seq-gen -mGTR -r 1.0 0.2 10.0 0.75 3.2 1.6 -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -l${j} -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
    
+
    # OLD PARAMS
    # -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l${j} -s0.018 -n1 -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
    echo "${seqgen_out}"
@@ -89,13 +90,18 @@ ENVDIR=$ENVNAME
       ;;
    esac
 
+
 # modify this line to run your desired Python script and any other work you need to do
 
 for i in 10000 30000 50000 100000 250000 500000
 do
    echo "$i"
    seqgen_output=${i}_${gene_trees}_${network}_${num_gene_trees}_seqgen.out
-   run_hyde.py -i ${seqgen_output} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s ${i} --prefix $1_$3_$4_${i}_HyDe
+   hyde_input=${j}_${gene_trees}_${network}_${num_gene_trees}_seqgen_concatenated.out
+   
+   python seqgen2hyde.py ${seqgen_out} ${hyde_input} $3
+   
+   run_hyde.py -i ${hyde_input} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s ${i} --prefix $1_$3_$4_${i}_HyDe
 
    HyDeOut=$1_$3_$4_${i}_HyDe-out.txt #verify thisdone
 done
@@ -136,11 +142,12 @@ done
    julia --project=my-project-julia chtc_cfTable.jl $1
 
 # requires quartet max cut [find-cut-Linux-64] in working directory; 
-   ./TICR/scripts/get-pop-tree.pl $1.CFs.csv
+#   ./TICR/scripts/get-pop-tree.pl $1.CFs.csv
 # this creates a file named $1.QMC.tre
 
-   TICROut=$5_n$3_$4_${num_trial}_ticr.csv
-   julia --project=my-project-julia chtc_TICR.jl $1 $1.QMC.tre ${TICROut}
+# we run this with our true network, which will be converted to its major tree
+TICROut=$5_n$3_$4_${num_trial}_ticr.csv
+julia --project=my-project-julia chtc_TICR.jl $1 $5 ${TICROut}
 
 # compares to the true network   
 # julia --project=my-project-julia chtc_TICR.jl $1 $5 ${TICROut}
