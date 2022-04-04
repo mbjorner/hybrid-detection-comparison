@@ -55,4 +55,4 @@ request_memory = 16GB
 request_disk = 16GB
 
 # number to run
-queue 30
+queue 1

@@ -8,6 +8,7 @@ import Pkg; Pkg.add("QuartetNetworkGoodnessFit")
 import Pkg; Pkg.add("DataFrames")
 import Pkg; Pkg.add("CSV")
 import Pkg; Pkg.add("PhyloNetworks")
+import Pkg; Pkg.add("ArgParse")
 
 using QuartetNetworkGoodnessFit, DataFrames, CSV, PhyloNetworks, ArgParse
  

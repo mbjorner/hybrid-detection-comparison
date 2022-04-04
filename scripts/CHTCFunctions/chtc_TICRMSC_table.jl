@@ -44,7 +44,7 @@ setsOfQuartets = size(TicrOut,1)
 for row in 1:setsOfQuartets
     # extract the quartet that it tells you
 
-    net = readTopologyLevel1(netFile);
+    net = readTopology(netFile);
     T1 = string(TicrOut[row, :t1]); #"1"
     T2 = string(TicrOut[row, :t2]);
     T3 = string(TicrOut[row, :t3]);

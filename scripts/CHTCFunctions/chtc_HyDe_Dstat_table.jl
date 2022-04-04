@@ -39,7 +39,7 @@ else
 end
 
 HyDeOut = DataFrame(CSV.File(HyDeFile))
-net = readTopologyLevel1(netFile);
+net = readTopology(netFile);
 
 # create new column called "HyDeHybrid" 1 / 0 (default is 0)
 insertcols!(HyDeOut, 6, :HyDeHybrid => 0)
@@ -67,7 +67,7 @@ setsOfTriplets = size(HyDeOut,1)
 for row in 1:setsOfTriplets
     # extract the triplet that it tells you
 
-    net = readTopologyLevel1(netFile);
+    net = readTopology(netFile);
     P1 = string(HyDeOut[row, :P1]);
     Hybrid = string(HyDeOut[row, :Hybrid]);
     P2 = string(HyDeOut[row, :P2]);
