@@ -46,6 +46,10 @@ cd $WORKDIR
 
 #chmod +x ./Seq-Gen-1.3.4/source/seq-gen
 
+# use same theta as hyde _ 0.01
+# use -q option
+# test on 4 taxon tree
+
 for j in 15000 30000 60000 105000 255000 510000
 do
    length=$(($INT($j)/$INT($4)))
@@ -60,10 +64,10 @@ do
    echo "${seqgen_out}"
 done
 
-for j in 50 100 150 200 500 1000 2000 5000 10000 50000 100000
+for j in 1000 2000 5000 10000 50000 100000 500000 800000 1000000 1500000
 do
    seqgen_out=${j}_${gene_trees}_${network}_${num_gene_trees}_seqgen.out
-   ./Seq-Gen-1.3.4/source/seq-gen -mGTR -r 1.0 0.2 10.0 0.75 3.2 1.6 -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -l${j} -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
+   ./Seq-Gen-1.3.4/source/seq-gen -mGTR -s 0.01 -r 1.0 0.2 10.0 0.75 3.2 1.6 -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -l${j} -q < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
 
    # OLD PARAMS
    # -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l${j} -s0.018 -n1 -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
@@ -120,7 +124,7 @@ do
    HyDeOut=$1_$3_$4_${i}_HyDe-out.txt #verify thisdone
 done
 
-for i in 50 100 150 200 500 1000 2000 5000 10000 50000 100000
+for i in 1000 2000 5000 10000 50000 100000 500000 800000 1000000 1500000
 do
    echo "$i"
    seqgen_output=${i}_${gene_trees}_${network}_${num_gene_trees}_seqgen.out
