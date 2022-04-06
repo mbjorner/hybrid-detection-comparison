@@ -21,12 +21,20 @@ MSC_results_alphaBonferroni = DataFrame(network = String[], gene_trees = Float64
 # Step 1: navigate to overall directory containing results
 cd("/Users/bjorner/GitHub/phylo-microbes/output/2022FEB15_output_alln10_n15/")
 
+cd("/Users/bjorner/GitHub/phylo-microbes/output/20220406output/")
+
 
 network_names = ["n10","n10orange","n10red","n15","n15blue","n15orange","n15red"]
 num_gene_trees = [30,100,300,1000,3000]
 
+network_names = ["n6","n10","n15"]
+num_gene_trees = [30,100,300,1000,3000]
+
 for net_names in network_names
-    net_num = net_names[1:3]
+
+    #net_num = net_names[1:3]
+    net_num = net_names
+
     for num_trees in num_gene_trees
         for file_number in 1:30
             filename = string(net_names,"/",net_names,".net_",net_num,"_", num_trees, "_", file_number, "_TICR_MSC_summary.csv")
@@ -111,6 +119,11 @@ for net_names in network_names
     end
 end 
 
-CSV.write(string("2022FEB15_MSCQuartets_results_alphaBonferroni_corr.csv"), MSC_results_alphaBonferroni)
-CSV.write(string("2022FEB15_MSCQuartets_results_alpha05_corr.csv"), MSC_results_alpha05)
-CSV.write(string("2022FEB15_TICR_results_withoutQMC_corr.csv"), ticrPOverall)
+prefix = ARGS[1]
+ticrout = "_ticr_results.csv"
+msc05 = "_msc05_results.csv"
+mscbonferroni = "_mscbonferroni_results.csv"
+
+CSV.write(string(prefix,mscbonferroni), MSC_results_alphaBonferroni)
+CSV.write(string(prefix,msc05), MSC_results_alpha05)
+CSV.write(string(prefix,ticrout), ticrPOverall)

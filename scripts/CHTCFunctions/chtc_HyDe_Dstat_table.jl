@@ -75,32 +75,31 @@ for row in 1:setsOfTriplets
 
     for l in tipLabels(net)
         if l ∉ triplet
-            PhyloNetworks.deleteleaf!(net,l, keeporiginalroot=true);
+            PhyloNetworks.deleteleaf!(net,l, keeporiginalroot=true, simplify=true);
             #@show net
         end 
     end 
 
     #plot(net,:R)
 
-    print("The number of hybrids leftover in the net is ", string(net.numHybrids), "\n")
+    #print("The number of hybrids leftover in the net is ", string(net.numHybrids), "\n")
 
     if net.numHybrids > 0 # then the triplets contain a hybrid relationship
         HyDeOut[row, :HybridTripletExpected] = 1;
     
         hybridclade = hardwiredCluster(net.hybrid[1].edge[1],tipLabels(net));
-        print("the hybrid clade is ", hybridclade)
-        trueHybrid = tipLabels(net)[hybridclade];
+        #print("the hybrid clade is ", hybridclade)
+        trueHybrid = tipLabels(net)[hybridclade]; # string vector
 
-        print("the hybrid clade is \n", hybridclade )
+        #print("the hybrid clade is \n", hybridclade )
 
-        print("the true hybrid is ", string(trueHybrid), "\n")
-        print("the hybrid is ", Hybrid)
+        #print("the true hybrid is ", string(trueHybrid), "\n")
+        #print("the hybrid is ", Hybrid)
         
-        if (cmp((string(trueHybrid)),string("[\"", Hybrid, "\"]")) == 0)
-            print(HyDeOut[row, :HyDeHybrid])
+        if (issubset([Hybrid], trueHybrid)) # if the hybrid is contained in true hybrids
+            # print(HyDeOut[row, :HyDeHybrid])
             HyDeOut[row, :HybridCorrectID] = 2
             if (HyDeOut[row, :HyDeHybrid] .== 1)
-                print("they match")
                 HyDeOut[row, :HybridCorrectID] = 1
             end
         else

@@ -53,14 +53,14 @@ for row in 1:setsOfQuartets
 
     for l in tipLabels(net)
         if l ∉ quartet
-            PhyloNetworks.deleteleaf!(net,l, keeporiginalroot=true);
+            PhyloNetworks.deleteleaf!(net,l, keeporiginalroot=true, simplify=true);
             #@show net
         end 
     end 
 
     #plot(net,:R)
 
-    print("The number of hybrids leftover in the net is ", string(net.numHybrids), "\n")
+    # print("The number of hybrids leftover in the net is ", string(net.numHybrids), "\n")
 
     if net.numHybrids > 0 # then the triplets contain a hybrid relationship
         hybridExpected[row] = 1;

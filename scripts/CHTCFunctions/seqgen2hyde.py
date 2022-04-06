@@ -8,19 +8,22 @@ outfile = open(argv[2], 'w') # this is what will become the input file for hyde,
 
 # this is a dictionary structure, can easily create new keys using input from map file OR simply number of taxa
 matrix = {}
-for i in range (1, n+1):
+rangeN = int(n) + 1 
+for i in range (1, rangeN):
     matrix[str(i)] = []
 
 # this is the nexus file created by seqgen
 with open(argv[1]) as f:
-    reps  = f.read().split(str(" ", n, " 1\n"))
+    splitby = " " + n + " 1\n"
+    reps  = f.read().split(splitby)
     split_reps = [r.splitlines() for r in reps] # reps is the number of trees simulated
-    for s in split_reps[1:]:
+    for s in split_reps:
         for l in s:
-            matrix[str(l.split()[0])].append(l.split()[1])
+            if len(l) > 30:
+                matrix[str(l.split()[0])].append(l.split()[1])
 
-for i in range(1, n+1):
-    print("i"+str(i), "\t", sep='', end='', file=outfile)
+for i in range(1, rangeN):
+    print(str(i), "\t", sep='', end='', file=outfile)
     for base in matrix[str(i)]:
         print(base, sep='', end='', file=outfile)
     print("\n", end='', file=outfile)

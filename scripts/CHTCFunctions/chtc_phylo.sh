@@ -221,8 +221,8 @@ MSCOut=$5_n$3_$4_${num_trial}_MSC.csv
  julia --project=my-project-julia chtc_TICRMSC_table.jl ${expected_quartets_file} ${TICROut} ${MSCOut} ${significance} ${true_network} ${TICRMSCSummaryOut}
 # output = ??
 
-# rm *_MSC.csv
-# rm *_ticr.csv
+rm *_MSC.csv
+rm *_ticr.csv
 
 # TICR table
 # MSCquartets table

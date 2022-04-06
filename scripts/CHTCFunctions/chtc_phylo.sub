@@ -10,15 +10,15 @@ newProcess = $INT(tempProcess)
 ### inputs
 
     # network
-    network=6
+    network=10
 
-    # map is either n10h2map.txt, n15h3map.txt, n25h5map.txt, or n50h10map.txt
-    map=n6h1map.txt
+    # map is either n10h2map.txt, n15h3map.txt, n25h5map.txt, or n50h10map.txt, n6h1map.txt
+    map=n10h2map.txt
 
     # true net is either: n10.net, n15.net, n25h5_1.net, 50h10_1.net, n10orange_1.net n15blue.net, n15red.net, n15orange.net
-    true_net=n6.net
+    true_net=n10.net
 
-    num_trees=1000
+    num_trees=30
 
 log = logs/job_$(Cluster)_$(true_net)_$(num_trees).log
 error = logs/job_$(Cluster)_$(newProcess).err
@@ -50,9 +50,9 @@ arguments = $(newProcess)_astral.in $(map) $(network) $(num_trees) $(true_net) $
 #request_memory = 64GB
 #request_disk = 64GB
 
-request_cpus = 1
+request_cpus = 2
 request_memory = 16GB
 request_disk = 16GB
 
 # number to run
-queue 1
+queue 30
