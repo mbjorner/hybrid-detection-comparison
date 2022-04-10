@@ -41,22 +41,45 @@ folder = string(folder,file,"/")
 cd(folder)
 
 k = 1
-#if numgt > 1000
-#    numgt % 1000 == 0 || error("we can only handle multiples of 1000 right now")
-#    k = convert(Int,numgt/1000)
-#end
+if numgt > 1000
+    numgt % 1000 == 0 || error("we can only handle multiples of 1000 right now")
+    k = convert(Int,numgt/1000)
+end
 
 Random.seed!(seed);
-ss = sample(1:55555,nrep*k)
+# ss = sample(1:55555,nrep*k)
 
 for i in 1:nrep
     @show i
+    nn = numgt > 1000 ? 1000 : numgt
     for j in 1:k
+        # create new seed so files are different each iteration
+        ss = sample(1:55555,nrep*k)
         @show j
-        nn = numgt #> 1000 ? 1000 : numgt
-        simulateGeneTrees(string(i,"-",j),file,"",outgroup,nn, ss[i], hybridlambda)
+        if k == 1
+            simulateGeneTrees(string(i,"-",j),file,"",outgroup,nn, ss[i], hybridlambda)
+        elseif k > 1
+            simulateGeneTrees(string(i,"-",j,"-",k),file,"",outgroup,nn, ss[i], hybridlambda)
+        end
+    end
+
+    # remove files that were concatenated, concatenate gt files
+    filename1 = string(file,"-gt",nn,"-",i,"-1-",k,".tre")
+    for l in 1:(k-1)
+        filename2 = string(file,"-gt",nn,"-",i,"-",l+1,"-",k,".tre")
+        run(`/bin/bash -c "cat $filename2 >> $filename1"`)
+        run(`/bin/bash -c "rm $filename2"`)
+
+    end
+
+    # rename as appropriate
+    finalfilename = string(file,"-gt",nn*k,"-",i,"-1.tre")
+    if k > 1 
+        run(`mv $filename1 $finalfilename`)
     end
 end
 
+ # get rid of "_1" from taxon names in files
+ run(`/bin/bash -c "sed -i '' 's/_1//g' $file*"`)
 
 
