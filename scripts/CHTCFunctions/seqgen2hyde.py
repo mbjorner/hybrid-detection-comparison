@@ -39,6 +39,8 @@ def concatenation_by_name(map, outfile, infile):
         name = line.split(" ")
         matrix[str(name[0])] = []
         names.append(str(name[0]))
+    
+    print(names)
 
 # this is the nexus file created by seqgen
     with open(infile) as f:
@@ -47,8 +49,11 @@ def concatenation_by_name(map, outfile, infile):
         split_reps = [r.splitlines() for r in reps] # reps is the number of trees simulated
         for s in split_reps:
             for l in s:
-                if len(l) > 30:
-                    matrix[str(l.split()[0])].append(l.split()[1])
+                # if l l.split()[0] exists in matrix and l.split()[1] is ATCG
+                taxa = str(l.split()[0])
+                atcg = str(l.split()[1])
+                if taxa in names:
+                    matrix[taxa].append(atcg)
     
     for entry in names:
         print(entry, "\t", sep='', end='', file=outfile)
