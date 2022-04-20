@@ -92,11 +92,15 @@ julia simulating-gene-trees.jl short_mix05 100 433732
 julia simulating-gene-trees.jl short_mix05 300 654898
 julia simulating-gene-trees.jl short_mix05 1000 239132
 
+
+
 removing the _1 from the output files requires using the following command in the same directory as the files:
 
 sed -i '' 's/_1//g' short*
 
 sed -i '' 's/_1//g' long*
+
+as of april2022, no longer require removal of _1; included in simulating-gene-trees.jl script
 
 
 ## Running seq-gen
@@ -120,3 +124,69 @@ P2  P2
 HYB HYB
 ```
 
+
+19APR2022
+Attempting new approach with gene trees vs. sequences. Now following HyDe approach of simulating tens of thousands of gene trees and only one base pair per sequence;
+
+50000, 100000, 250000, 500000 
+
+julia simulating-gene-trees.jl long_mix0 50000 24414561
+julia simulating-gene-trees.jl long_mix0 100000 53587631
+julia simulating-gene-trees.jl long_mix0 250000 762335942
+julia simulating-gene-trees.jl long_mix0 500000 181731251
+
+julia simulating-gene-trees.jl long_mix01 50000 47112053
+julia simulating-gene-trees.jl long_mix01 100000 21928191
+julia simulating-gene-trees.jl long_mix01 250000 8236186
+julia simulating-gene-trees.jl long_mix01 500000 1225867
+
+julia simulating-gene-trees.jl long_mix02 50000 342215791
+julia simulating-gene-trees.jl long_mix02 100000 198141484
+julia simulating-gene-trees.jl long_mix02 250000 84829164
+julia simulating-gene-trees.jl long_mix02 500000 47026095
+
+julia simulating-gene-trees.jl long_mix03 50000 75327069
+julia simulating-gene-trees.jl long_mix03 100000 51722091
+julia simulating-gene-trees.jl long_mix03 250000 475676116
+julia simulating-gene-trees.jl long_mix03 500000 72229109
+
+julia simulating-gene-trees.jl long_mix04 50000 81690291
+julia simulating-gene-trees.jl long_mix04 100000 52101735
+julia simulating-gene-trees.jl long_mix04 250000 06371274
+julia simulating-gene-trees.jl long_mix04 500000 85982228
+
+((HAVE ONLY RUN THESE: long_mix05 as trial, takes >1 hour to simulate gene trees up to 500k))
+julia simulating-gene-trees.jl long_mix05 50000 70293396
+julia simulating-gene-trees.jl long_mix05 100000 573110835
+julia simulating-gene-trees.jl long_mix05 250000 79624091
+julia simulating-gene-trees.jl long_mix05 500000 42110233
+
+julia simulating-gene-trees.jl short_mix0 30 471411232
+julia simulating-gene-trees.jl short_mix0 100 6543213699
+julia simulating-gene-trees.jl short_mix0 300 865325398
+julia simulating-gene-trees.jl short_mix0 1000 310197016
+
+julia simulating-gene-trees.jl short_mix01 30 163271437
+julia simulating-gene-trees.jl short_mix01 100 6312515565
+julia simulating-gene-trees.jl short_mix01 300 99138985998
+julia simulating-gene-trees.jl short_mix01 1000 2342872833
+
+julia simulating-gene-trees.jl short_mix02 30 1645347918
+julia simulating-gene-trees.jl short_mix02 100 53325618548
+julia simulating-gene-trees.jl short_mix02 300 9612321329
+julia simulating-gene-trees.jl short_mix02 1000 8932857020
+
+julia simulating-gene-trees.jl short_mix03 30 412675259
+julia simulating-gene-trees.jl short_mix03 100 1435709154
+julia simulating-gene-trees.jl short_mix03 300 1238149859
+julia simulating-gene-trees.jl short_mix03 1000 461546399
+
+julia simulating-gene-trees.jl short_mix04 30 49883895
+julia simulating-gene-trees.jl short_mix04 100 75171282
+julia simulating-gene-trees.jl short_mix04 300 89505932
+julia simulating-gene-trees.jl short_mix04 1000 35136772
+
+julia simulating-gene-trees.jl short_mix05 30 91592084
+julia simulating-gene-trees.jl short_mix05 100 43153732
+julia simulating-gene-trees.jl short_mix05 300 15654898
+julia simulating-gene-trees.jl short_mix05 1000 36239132

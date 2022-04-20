@@ -5,10 +5,17 @@
 
 
 
-setwd("~/GitHub/phylo-microbes/output/2022FEB15_output_alln10_n15")
+#setwd("~/GitHub/phylo-microbes/output/2022FEB15_output_alln10_n15")
 
-inputFile = "2022FEB15summarytable_withWrongClades_BonferroniCorrected_HyDe.csv";
-inputFile = "2022FEB15summarytable_withWrongClades_HyDe.csv";
+#inputFile = "2022FEB15summarytable_withWrongClades_BonferroniCorrected_HyDe.csv";
+#inputFile = "2022FEB15summarytable_withWrongClades_HyDe.csv";
+
+setwd("~/GitHub/phylo-microbes/output/20220406output")
+
+inputFile = "20220406output_HyDe_DStat_p05_lenpertree.csv";
+inputFile = "20220406output_HyDe_DStat_p05_totlen.csv";
+inputFile = "20220406output_HyDe_DStat_pbonferroni_lenpertree.csv"
+inputFile = "20220406output_HyDe_DStat_pbonferroni_totlen.csv"
 
 # read input file as a dataframe for use with ggplot2;
 # ggplot2 must be installed w accompanying packages.

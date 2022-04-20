@@ -4,24 +4,35 @@
 using QuartetNetworkGoodnessFit, DataFrames, CSV, PhyloNetworks
 
 cd("/Users/bjorner/GitHub/phylo-microbes/output/n6out/")
+cd("/Users/bjorner/GitHub/phylo-microbes/output/20220406output/")
 
 total_false = DataFrame(network_name = String[], gene_trees = Float64[],  trial_num = Float64[], seq_length = Float64[], 
                         HyDe_fp = Float64[], HyDe_fn = Float64[], HyDe_tp = Float64[], HyDe_tn = Float64[], HyDe_wrongClade = Float64[],
                         Dstat_fp = Float64[], Dstat_fn = Float64[], Dstat_tp = Float64[], Dstat_tn = Float64[], Dstat_wc = Float64[])
 
-network_names = ["n6"] # "n10","n10orange","n10red","n15","n15blue","n15orange","n15red"]
+network_names = ["n6", "n10", "n15"] # "n10","n10orange","n10red","n15","n15blue","n15orange","n15red"]
+prefix = "20220406output"
+suffix = string(ARGS[1])
+
+if suffix == "_lenpertree"
+    seq_lengths = [50,100,150,200,500,1000,2000,5000,10000,50000,100000]
+elseif suffix == "_totlen"
+    seq_lengths = [15000,30000,60000,105000,255000,510000]
+end
 
 num_gene_trees = [30,100,300,1000,3000]
-seq_lengths = [10000,30000,50000,100000,250000,500000]
+# seq_lengths = [10000,30000,50000,100000,250000,500000]
 # num_gene_trees = [50, 100, 500, 1000]
 for net_names in network_names
-    net_num = net_names[1:2] #[1:3]
+    # net_num = net_names[1:2] #[1:3]
+    net_num = net_names
     for seq_length in seq_lengths
     for num_trees in num_gene_trees
         for file_number in 1:30
             #filename = string(net_names,"/HyDe_Dstat/",net_names,".net_",net_num,"_", num_trees, "_", file_number, "_",seq_length, "_HyDe_Dstat.csv")
-            filename = string(net_names,".net_",net_num,"_", num_trees, "_", file_number, "_",seq_length, "_HyDe_Dstat.csv")
+            filename = string(net_names,"/HyDe_Dstat/", net_names,".net_",net_num,"_", num_trees, "_", file_number, "_",seq_length, "_HyDe_Dstat", suffix,".csv")
 
+            if isfile(filename)
             file = DataFrame(CSV.File(filename))
             insertcols!(file, size(file, 2) + 1, :FP => 0);
             insertcols!(file, size(file, 2) + 1, :FN => 0);
@@ -106,12 +117,14 @@ for net_names in network_names
             global total_false
             push!(total_false, [net_names, num_trees, file_number, seq_length, HyDe_FP, HyDe_FN, HyDe_TP, HyDe_TN, HyDe_WC, 
                                 Dstat_FP, Dstat_FN, Dstat_TP, Dstat_TN, Dstat_WC])
+            end
         end 
     end
 end
 end
 
-CSV.write(string("2022FEB15summarytable_withWrongClades_HyDe.csv"), total_false)
+
+CSV.write(string(prefix, "_HyDe_DStat_p05",suffix,".csv"), total_false)
 
 
 # Now a bonferroni corrected version: where level is determined by 0.05/nrows (number of triplet tests)
@@ -123,11 +136,14 @@ total_false_bf = DataFrame(network_name = String[], gene_trees = Float64[],  tri
                         Dstat_fp = Float64[], Dstat_fn = Float64[], Dstat_tp = Float64[], Dstat_tn = Float64[], Dstat_wc = Float64[])
 for seq_length in seq_lengths
     for net_names in network_names
-        net_num = net_names[1:3]
+        #net_num = net_names[1:3]
+        net_num = net_names
         for num_trees in num_gene_trees
             for file_number in 1:30
-                filename = string(net_names,"/HyDe_Dstat/",net_names,".net_",net_num,"_", num_trees, "_", file_number, "_",seq_length, "_HyDe_Dstat.csv")
-
+                filename = string(net_names,"/HyDe_Dstat/", net_names,".net_",net_num,"_", num_trees, "_", file_number, "_",seq_length, "_HyDe_Dstat", suffix,".csv")
+                
+                if isfile(filename)
+                
                 file = DataFrame(CSV.File(filename))
                 bonLevel = 0.05/size(file,1);
 
@@ -218,9 +234,10 @@ for seq_length in seq_lengths
                 global total_false_bf
                 push!(total_false_bf, [net_names, num_trees, file_number, seq_length, HyDe_FP, HyDe_FN, HyDe_TP, HyDe_TN, HyDe_WC, 
                                     Dstat_FP, Dstat_FN, Dstat_TP, Dstat_TN, Dstat_WC])
+                end
             end 
         end
     end
 end
 
-CSV.write(string("n6summaryHyDe.csv"), total_false_bf)
+CSV.write(string(prefix, "_HyDe_DStat_pbonferroni",suffix,".csv"), total_false_bf)

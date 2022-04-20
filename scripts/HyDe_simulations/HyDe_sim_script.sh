@@ -45,16 +45,20 @@ cd $WORKDIR
 #ls
 
 #chmod +x ./Seq-Gen-1.3.4/source/seq-gen
+# seed incorrectly generates all the same sequences?
 
-for j in 50000 100000 250000 500000
-do
-   seqgen_out=${j}_${gene_trees}_${network}_seqgen.out
-   ./Seq-Gen-1.3.4/source/seq-gen -mGTR -r 1.0 0.2 10.0 0.75 3.2 1.6 -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -s0.018 -n1  -l${j} -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_seqgen.log
+seqgen_out=${gene_trees}_${network}_seqgen.out
+#./Seq-Gen-1.3.4/source/seq-gen -mGTR -r 1.0 0.2 10.0 0.75 3.2 1.6 -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -s0.018 -n1 -l1 < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_seqgen.log
    
+THETA=0.01
+
+./Seq-Gen-1.3.4/source/seq-gen -mGTR -s $THETA -l 1 -r 1.0 0.2 10.0 0.75 3.2 1.6 \
+        -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -q < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_seqgen.log
+
    # OLD PARAMS
    # -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l${j} -s0.018 -n1 -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
-   echo "${seqgen_out}"
-done
+echo "${seqgen_out}"
+
 # have job exit if any command returns with non-zero exit status (aka failure)
 # set -e
 
@@ -91,22 +95,31 @@ ENVDIR=$ENVNAME
 
 # modify this line to run your desired Python script and any other work you need to do
 
-for i in 50000 100000 250000 500000
-do
-   echo "$i"
-   seqgen_output=${i}_${gene_trees}_${network}_seqgen.out
-   run_hyde.py -i ${seqgen_output} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s ${i} --prefix $1_$3_${i}_HyDe
 
-   HyDeOut=$1_$3_${i}_HyDe-out.txt
-done
+seqgen_output=${gene_trees}_${network}_seqgen.out
+hyde_input=${gene_trees}_${network}_seqgen_concatenated.out
+
+# using map as 3rd argument
+python seqgen2hyde.py ${seqgen_output} ${hyde_input} $2
+   
+for i in 30 100 300 1000 50000 100000 250000 500000
+do
+   j="$i"
+   if [[ "$1" == *"$j"* ]]; then
+      echo "It's there."
+      run_hyde.py -i ${hyde_input} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s ${i} --prefix $1_$3_HyDe
+   fi
+   done
+HyDeOut=$1_$3_HyDe-out.txt
+
 
  #exit environment
 
-rm *seqgen*
+rm *seqgen.*
 
 # extract Julia binaries tarball
-   tar -xzf julia-1.6.1-linux-x86_64.tar.gz
-   tar -xzf my-project-julia.tar.gz
+tar -xzf julia-1.6.1-linux-x86_64.tar.gz
+tar -xzf my-project-julia.tar.gz
 
 # add Julia binary to path
 export PATH=$_CONDOR_SCRATCH_DIR/julia-1.6.1/bin:$PATH
@@ -115,12 +128,11 @@ export JULIA_DEPOT_PATH=$_CONDOR_SCRATCH_DIR/my-project-julia
 
 # HyDe table
 
-for i in 50000 100000 250000 500000
-do
-    HyDeOut=$1_$3_${i}_HyDe-out.txt 
-    HyDeOutName=$1_$3_${i}_HyDe.csv
-    julia --project=my-project-julia chtc_HyDe_table.jl ${HyDeOut} ${true_network} ${significance} ${HyDeOutName}
-done
+
+HyDeOut=$1_$3_HyDe-out.txt 
+HyDeOutName=$1_$3_HyDe.csv
+julia --project=my-project-julia chtc_HyDe_table.jl ${HyDeOut} ${true_network} ${significance} ${HyDeOutName}
+
 
 rm *HyDe-out*
 rm *_expected.csv

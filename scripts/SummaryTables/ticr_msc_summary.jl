@@ -38,7 +38,7 @@ for net_names in network_names
     for num_trees in num_gene_trees
         for file_number in 1:30
             filename = string(net_names,"/",net_names,".net_",net_num,"_", num_trees, "_", file_number, "_TICR_MSC_summary.csv")
-            if isfile(filename)
+            
                 file = DataFrame(CSV.File(filename))
             
                 pVal = file[1,:overallPval]

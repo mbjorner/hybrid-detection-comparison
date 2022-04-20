@@ -13,7 +13,7 @@ include("functions.jl")
 hybridlambda = "/Users/Clauberry/Dropbox/software/hybrid-Lambda/src/hybrid-Lambda"
 hybridlambda = "/Users/bjorner/GitHub/hybrid-lambda/src/hybrid-Lambda" # cloned github repo and make
 ##makeultrametric = "/Users/Clauberry/Dropbox/Documents/solislemus-lab/my-projects/present/ransanec/ransanec/scripts/makeultrametric"
-folder = "/Users/bjorner/GitHub/phylo-microbes/data/" #knownGT/singleNet/"
+folder = "/Users/bjorner/GitHub/phylo-microbes/data/HyDe_four_taxon/long_branches/" #knownGT/singleNet/"
 #folder = "/Users/bjorner/GitHub/phylo-microbes/data/HyDe_four_taxon/long_branches/"
 
 file = "20211109_simpleNetwork"
@@ -34,7 +34,11 @@ elseif file == "n50h10"
     outgroup = "t50"
 elseif file == "n100h20"
     outgroup = "t53" ## t100 has root mismatch
+elseif startswith(file, "long") || startswith(file, "short")
+    outgroup = "O"
 end
+
+
 
 ## Create folder for files
 folder = string(folder,file,"/")
@@ -79,7 +83,11 @@ for i in 1:nrep
     end
 end
 
- # get rid of "_1" from taxon names in files
- run(`/bin/bash -c "sed -i '' 's/_1//g' $file*"`)
+# get rid of "_1" from taxon names in files
+run(`/bin/bash -c "sed -i '' 's/_1//g' $file*"`)
 
-
+# write simulation parameters to a file
+fileSimParam = string(file,"-",numgt,"-simulation-parameters.txt")
+open(fileSimParam, "w") do io
+    write(io, string("file is: ", file, "\nnumgt is: ", numgt, "\nseed is: ", seed, "\nreps is: ", nrep))
+end;
