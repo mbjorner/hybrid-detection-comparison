@@ -349,3 +349,129 @@ requires a larger amount of space than prior tests run for smaller sequence leng
 
 The generation of networks of 25, 50, and 100 taxa, the larger networks used, will require more space, dependent on the number of
 gene trees tested. So far (27JAN2022), we do not yet have 5000 gene-tree datasets for these, as simulating-gene-trees.jl cannot generate these.
+
+## HyDe: many more gene tree simulations needed, 1 base pair sequence generated each
+As of April 2022, a determination was made to increase the number of gene trees simulated per network and reduce the length of sequences generated per tree. This was to ensure that each site was independent from each other, which was important for the success of HyDe (and also the D-statistic). In turn, the following gene trees were simulated to match the original HyDe paper parameters:
+
+```
+
+# n10 orange
+
+julia simulating-gene-trees.jl n10orange 10000 12382591
+julia simulating-gene-trees.jl n10orange 50000 2843666
+julia simulating-gene-trees.jl n10orange 100000 9525411
+julia simulating-gene-trees.jl n10orange 250000 1866503
+julia simulating-gene-trees.jl n10orange 500000 9313503
+
+# n10 red
+
+julia simulating-gene-trees.jl n10red 10000 234266
+julia simulating-gene-trees.jl n10red 50000 6096259
+julia simulating-gene-trees.jl n10red 100000 42779985
+julia simulating-gene-trees.jl n10red 250000 3871469
+julia simulating-gene-trees.jl n10red 500000 2351863
+
+# n15 blue
+
+julia simulating-gene-trees.jl n15blue 10000 2235790
+julia simulating-gene-trees.jl n15blue 50000 5716904
+julia simulating-gene-trees.jl n15blue 100000 2557520
+julia simulating-gene-trees.jl n15blue 250000 14626350
+julia simulating-gene-trees.jl n15blue 500000 3426831
+
+# n15 red
+
+julia simulating-gene-trees.jl n15red 10000 2097034
+julia simulating-gene-trees.jl n15red 50000 3421823
+julia simulating-gene-trees.jl n15red 100000 2273134
+julia simulating-gene-trees.jl n15red 250000 5212183
+julia simulating-gene-trees.jl n15red 500000 96348745
+
+# n15 orange
+
+julia simulating-gene-trees.jl n15orange 10000 61221591
+julia simulating-gene-trees.jl n15orange 50000 2822616
+julia simulating-gene-trees.jl n15orange 100000 2914211
+julia simulating-gene-trees.jl n15orange 250000 579303
+julia simulating-gene-trees.jl n15orange 500000 74192023
+```
+
+all files were compressed for transport to chtc submit-1 server, then unzipped there in input folder
+
+```
+
+cd ~/GitHub/phylo-microbes/data/knownGT/singleNet
+tar -czf n15blue.tar.gz n15blue 
+tar -czf n15red.tar.gz n15red
+tar -czf n15orange.tar.gz n15orange
+tar -czf n10orange.tar.gz n10orange
+tar -czf n10red.tar.gz n10red
+
+# ensure logged in to campus vpn before transmitting:
+
+scp n1*tar.gz bjorner@submit-1.chtc.wisc.edu:/home/bjorner/input
+
+# can then unzip files on chtc
+
+chtc > tar -xf n15blue.tar.gz n15blue
+chtc > tar -xf n15red.tar.gz n15red
+chtc > tar -xf n15orange.tar.gz n15orange
+chtc > tar -xf n10red.tar.gz n10red
+chtc > tar -xf n10orange.tar.gz n10orange 
+
+```
+
+Each collection of files "net15" (n15red = 1 collection) is approximately 9GB unzipped.
+Each collection of files "net10" (n10red = 1) is approximately 6GB unzipped
+Estimated 6/10 GB per additional taxon. 25 taxon trees would need 15GB, 50 @ 30 GB 
+(too much for chtc to support storage-wise if full 30 samples of 500k gene trees).
+
+
+# simulating larger trees for n15 and n10
+Also required was simulating larger sets of gene trees for the original n15 and n10 files. In order to keep all gene tree simulations to the same standard, the original n10 and n15 files (for 30, 100, 300, 1000, and 3000 gene trees) that were run with ms were replaced with gene trees run with hybridlambda.
+
+
+```
+
+# n10
+julia simulating-gene-trees.jl n10 30 56435034
+julia simulating-gene-trees.jl n10 100 2121050013
+julia simulating-gene-trees.jl n10 300 2101274134
+julia simulating-gene-trees.jl n10 1000 3045383
+julia simulating-gene-trees.jl n10 3000 12070630
+julia simulating-gene-trees.jl n10 10000 59123790
+julia simulating-gene-trees.jl n10 50000 41569201
+julia simulating-gene-trees.jl n10 100000 36027523
+julia simulating-gene-trees.jl n10 250000 11271910
+julia simulating-gene-trees.jl n10 500000 32354231
+
+# n15
+julia simulating-gene-trees.jl n15 30 3091624
+julia simulating-gene-trees.jl n15 100 13489001
+julia simulating-gene-trees.jl n15 300 43271420
+julia simulating-gene-trees.jl n15 1000 7340932
+julia simulating-gene-trees.jl n15 3000 45708234
+julia simulating-gene-trees.jl n15 10000 791322034
+julia simulating-gene-trees.jl n15 50000 10950013
+julia simulating-gene-trees.jl n15 100000 207064134
+julia simulating-gene-trees.jl n15 250000 90553183
+julia simulating-gene-trees.jl n15 500000 29600630
+
+```
+
+These were also compressed and transferred to chtc as above.
+
+```
+cd ~/GitHub/phylo-microbes/data/knownGT/multiNet
+tar -czf n10.tar.gz n10 
+tar -czf n15.tar.gz n15
+
+# ensure logged in to campus vpn before transmitting:
+
+scp n1*tar.gz bjorner@submit-1.chtc.wisc.edu:/home/bjorner/input
+
+# can then unzip files on chtc
+
+chtc > tar -xf n15.tar.gz n15
+chtc > tar -xf n10.tar.gz n10
+```

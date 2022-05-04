@@ -43,6 +43,7 @@ def concatenation_by_name(map, outfile, infile):
     print(names)
 
 # this is the nexus file created by seqgen
+    basepairs = "ATCG?"
     with open(infile) as f:
         splitby = " " + names[0] + " " + names[1] + "\n"
         reps  = f.read().split(splitby)
@@ -52,7 +53,7 @@ def concatenation_by_name(map, outfile, infile):
                 # if l l.split()[0] exists in matrix and l.split()[1] is ATCG
                 taxa = str(l.split()[0])
                 atcg = str(l.split()[1])
-                if taxa in names:
+                if (taxa in names) and (atcg in basepairs):
                     matrix[taxa].append(atcg)
     
     for entry in names:
