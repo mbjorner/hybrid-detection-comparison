@@ -6,8 +6,13 @@
 
 setwd("~/GitHub/phylo-microbes/output/2022FEB15_output_alln10_n15")
 
-inputFile = "2022FEB15_MSCQuartets_results_alpha05.csv";
-inputFile = "2022FEB15_MSCQuartets_results_alphaBonferroni.csv";
+inputFile = "2022FEB15_MSCQuartets_results_alpha05_corr.csv";
+inputFile = "2022FEB15_MSCQuartets_results_alphaBonferroni_corr.csv";
+
+setwd("~/GitHub/phylo-microbes/output/20220406output")
+
+inputFile = "20220406output_deleteleaves_msc05_results.csv"
+inputFile = "20220406output_deleteleaves_mscbonferroni_results.csv";
 
 # read input file as a dataframe for use with ggplot2;
 # ggplot2 must be installed w accompanying packages.
@@ -23,13 +28,14 @@ MSC_data = read.csv(inputFile);
 
 MSC_counts <- MSC_data %>% group_by(network, gene_trees)
 
+
 summary_MSC <- MSC_counts %>% summarise(
   false_negatives = mean(FN),
   false_positives = mean(FP),
   true_negatives = mean(TN),
   true_positives = mean(TP),
-  false_neg_rate = mean(FN) / (mean(TP)), 
-  false_pos_rate = mean(FP) / (mean(TN))
+  false_neg_rate = mean(FN) / (mean(TP) + mean(FN)), 
+  false_pos_rate = mean(FP) / (mean(TN) + mean(FP))
 )
 
 # goal is now to plot the summary_MSC that we have created with false positive 
