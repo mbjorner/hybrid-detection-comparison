@@ -28,7 +28,7 @@ A quick & dirty trick is used here.
 Fix this bug in `PhyloNetworks.readFastaToArray`: use
 sequence(DNASequence, record) instead of sequence(record)
 """
-function calcPatternCounts(file::String; taxa=["P1","P2","P3","O"], ambig=:D)
+function calcPatternCounts(file::String; taxa=[1,2,3,10], ambig=:D)
   # read alignment and make it a matrix
   species, alg = PhyloNetworks.readFastaToArray(file)
   ## bug: due to [FASTA.Reader](https://github.com/BioJulia/BioSequences.jl/issues/64)
@@ -37,6 +37,7 @@ function calcPatternCounts(file::String; taxa=["P1","P2","P3","O"], ambig=:D)
     if !(eltype(alg[i]) <: DNA)
         alg[i] = DNASequence(convert(String, alg[i]))
     end
+    print(length(alg[i]))
   end
   # alg = PhyloNetworks.readfastatodna(file) with next registered version
   # perhaps do better using BioSequences or BioAlignments directly:

@@ -115,6 +115,280 @@ function runTests(net_array)
 
 end
 
+function multiplyEdgeLengths!(net, factor)
+    for edge in net.edge
+        edge.length = edge.length * factor
+    end
+end
+
+
+function numMajorEdgesToRoot(net::HybridNetwork, node::PhyloNetworks.Node)
+    for edge in node.edge
+        if edge.number == net.root
+            return 0
+        end
+    end
+
+    node = PhyloNetworks.getMajorParent(node)
+    return 1 + numMajorEdgesToRoot(net, node)
+end
+
+function numHybridEdgesIntersectPathToRoot(net::HybridNetwork, node::PhyloNetworks.Node)
+    for edge in node.edge
+        if edge.number == net.root
+            return 0
+        end
+    end
+
+    for edge in node.edge
+        if edge
+
+end
+"""
+takes input hybrid network and transforms it into an ultrametric network
+by 
+"""
+function makeUltrametricByNodeDepth(net::HybridNetwork)
+    """
+    preorder!(net) # PhyloNetworks.directEdges!(net) ?? should we also direct the edges or is this unneeded
+    heights = PhyloNetworks.getHeights(net)
+    max_tip_height = findmax(heights)[1]
+    heights_dict = Dict([node.name => (heights[i], node.number, node, numMajorEdgesToRoot(net, node)) for (i,node) in enumerate(net.nodes_changed)])
+    labels = tipLabels(net)
+
+    for tip_name in labels
+        tip_height = heights_dict[tip_name][1]
+        node = heights_dict[tip_name][3]
+        node_edges_to_root = heights_dict[tip_name][4]
+        print("the number of edges to the root from ", tip_name, " is ", node_edges_to_root,"\n")
+        if tip_height != max_tip_height # should there be floating point error accounted for?
+            # change the length of the external edge that the tip is attached to to make it same length
+            # downstream clades of parent node of a tip indicate sister clades
+        end
+    end
+    """
+    preorder!(net)
+    elen = Float64[] # edge lengths to be used for plotting. same order as net.edge.
+
+        # setting elen such that the age of each node = 1 + age of oldest child
+        # (including minor hybrid edges): need true post-ordering.
+        # calculating node ages first, elen will be calculated later.
+        elen     = zeros(Float64,net.numEdges)
+        node_age = zeros(Float64,net.numNodes)
+        for i=length(net.node):-1:1 # post-order traversal
+            if (net.nodes_changed[i].leaf) continue; end
+            ni = findfirst(x -> x===net.nodes_changed[i], net.node)
+            for e in net.nodes_changed[i].edge # loop over children only
+                if net.nodes_changed[i] == (e.isChild1 ? e.node[2] : e.node[1])
+                    node_age[ni] = max(node_age[ni], 1 +
+                     node_age[findfirst(x -> x=== PhyloNetworks.getChild(e), net.node)])
+                end
+            end
+        end
+
+    useSimpleHybridLines = true
+        # determine xB,xE for each edge: pre-order traversal, uses branch lengths
+    # then x and yB,yE for each node: x=xE of parent edge
+    xmin = 1.0; xmax=xmin
+    node_x  = zeros(Float64,net.numNodes) # order: in net.nodes, *!not in nodes_changed!*
+    edge_xB = zeros(Float64,net.numEdges) # min (B=begin) and max (E=end)
+    edge_xE = zeros(Float64,net.numEdges) # xE-xB = edge length
+    node_x[net.root] = xmin # root node: x=xmin=0
+    for i=2:length(net.node)              # true pre-order, skipping the root (i=1)
+        ni = findfirst(x -> x===net.nodes_changed[i], net.node)
+        ei = nothing # index of major parent edge of current node
+        for e in net.nodes_changed[i].edge
+            if (e.isMajor && net.nodes_changed[i] == e.node[e.isChild1 ? 1 : 2]) # major parent edge
+                ei = findfirst(x -> x===e, net.edge)
+                break
+            end
+        end
+        ei !== nothing || error("oops, could not find major parent edge of node number $ni.")
+
+        pni = findfirst(x -> x===PhyloNetworks.getParent(net.edge[ei]), net.node) # parent node index
+        edge_xB[ei] = node_x[pni]
+        elen[ei] = node_age[pni] - node_age[ni]
+        edge_xE[ei] = edge_xB[ei] + elen[ei]
+        node_x[ni] = edge_xE[ei]
+    end
+    # then x and yB,yE for each node: x=xE of parent edge
+    xmin = 1.0; xmax=xmin
+    node_x  = zeros(Float64,net.numNodes) # order: in net.nodes, *!not in nodes_changed!*
+    edge_xB = zeros(Float64,net.numEdges) # min (B=begin) and max (E=end)
+    edge_xE = zeros(Float64,net.numEdges) # xE-xB = edge length
+    node_x[net.root] = xmin # root node: x=xmin=0
+    for i=2:length(net.node)              # true pre-order, skipping the root (i=1)
+        ni = findfirst(x -> x===net.nodes_changed[i], net.node)
+        ei = nothing # index of major parent edge of current node
+        for e in net.nodes_changed[i].edge
+            if (e.isMajor && net.nodes_changed[i] == e.node[e.isChild1 ? 1 : 2]) # major parent edge
+                ei = findfirst(x -> x===e, net.edge)
+                break
+            end
+        end
+        ei !== nothing || error("oops, could not find major parent edge of node number $ni.")
+        pni = findfirst(x -> x===PhyloNetworks.getParent(net.edge[ei]), net.node) # parent node index
+        edge_xB[ei] = node_x[pni]
+        elen[ei] = node_age[pni] - node_age[ni]
+        edge_xE[ei] = edge_xB[ei] + elen[ei]
+        node_x[ni] = edge_xE[ei]
+    end
+
+    # coordinates of the diagonal lines that connect hybrid edges with their targets
+    minoredge_xB = Float64[]
+    minoredge_xE = Float64[]
+
+    for i=1:net.numEdges
+        if (!net.edge[i].isMajor) # minor hybrid edges
+            # indices of child and parent nodes
+            cni = findfirst(x -> x===PhyloNetworks.getChild( net.edge[i]), net.node)
+            pni = findfirst(x -> x===PhyloNetworks.getParent(net.edge[i]), net.node)
+
+            edge_xB[i] = node_x[pni]
+            edge_xE[i] = useSimpleHybridLines ? edge_xB[i] : (useEdgeLength ? edge_xB[i] + elen[i] : node_x[cni])
+
+            push!(minoredge_xB, edge_xE[i])
+            push!(minoredge_xE, node_x[cni])
+            #@show i; @show net.edge[i]; @show pni; @show net.node[pni]; @show cni; @show net.node[cni]
+        end
+    end
+
+    
+    for i=1:net.numEdges
+        if (!net.edge[i].isMajor) # minor hybrid edges
+            # indices of child and parent nodes
+            cni = findfirst(x -> x===PhyloNetworks.getChild( net.edge[i]), net.node)
+            pni = findfirst(x -> x===PhyloNetworks.getParent(net.edge[i]), net.node)
+
+            edge_xB[i] = node_x[pni]
+            edge_xE[i] = node_x[cni]
+
+            elen[i] = edge_xE[i] - edge_xB[i]
+
+            push!(minoredge_xB, edge_xE[i])
+            push!(minoredge_xE, node_x[cni])
+            #@show i; @show net.edge[i]; @show pni; @show net.node[pni]; @show cni; @show net.node[cni]
+        end
+    end
+    
+    for i in 1:size(net.edge,1)
+        #print(elen[i])
+        net.edge[i].length = elen[i]
+    end
+
+    return net
+end
+
+"""
+multiplies edge lengths of siblings by a ratio 
+"""
+function scaleSiblings(net::HybridNetwork, sisterTaxa::[::AbstractString, ::AbstractString], scale)
+
+end
+
+function areSiblings(net::HybridNetwork, sisterTaxa)
+    len = size(sisterTaxa,1)
+    if len > 2
+        error("too many clades")
+    end
+    net.nodesisterTaxa[1]
+    sisterTaxa[2]
+end
+
+"""
+PhyloNetworks.rootatnode!(t25big_not_ultrametric, "t25")
+makeUltrametric!(t25big_not_ultrametric)
+makeUltrametricViaScale!(t25big_not_ultrametric)
+plot(t25big_not_ultrametric, :R, useEdgeLength=true, style = :majortree, showEdgeLength=true)
+"""
+
+arr_net = [net_not_ultrametric, net_ultrametric, t25big_not_ultrametric]
+runTests(arr_net)
+
+
+function makeUltrametricByNodeDepth!(net::HybridNetwork)
+    preorder!(net)
+        # setting elen such that the age of each node = 1 + age of oldest child
+        # (including minor hybrid edges): need true post-ordering.
+        # calculating node ages first, elen will be calculated later.
+    elen     = zeros(Float64,net.numEdges)
+    node_age = zeros(Float64,net.numNodes)
+    for i=length(net.node):-1:1 # post-order traversal
+        if (net.nodes_changed[i].leaf) continue; end
+        ni = findfirst(x -> x===net.nodes_changed[i], net.node)
+        for e in net.nodes_changed[i].edge # loop over children only
+            if net.nodes_changed[i] == (e.isChild1 ? e.node[2] : e.node[1])
+                node_age[ni] = max(node_age[ni], 1 +
+                 node_age[findfirst(x -> x=== PhyloNetworks.getChild(e), net.node)])
+            end
+        end
+    end
+        # determine xB,xE for each edge: pre-order traversal, uses branch lengths
+    # then x and yB,yE for each node: x=xE of parent edge
+    xmin = 1.0; xmax=xmin
+    node_x  = zeros(Float64,net.numNodes) # order: in net.nodes, *!not in nodes_changed!*
+    edge_xB = zeros(Float64,net.numEdges) # min (B=begin) and max (E=end)
+    edge_xE = zeros(Float64,net.numEdges) # xE-xB = edge length
+    node_x[net.root] = xmin # root node: x=xmin=0
+    for i=2:length(net.node)              # true pre-order, skipping the root (i=1)
+        ni = findfirst(x -> x===net.nodes_changed[i], net.node)
+        ei = nothing # index of major parent edge of current node
+        for e in net.nodes_changed[i].edge
+            if (e.isMajor && net.nodes_changed[i] == e.node[e.isChild1 ? 1 : 2]) # major parent edge
+                ei = findfirst(x -> x===e, net.edge)
+                break
+            end
+        end
+        ei !== nothing || error("oops, could not find major parent edge of node number $ni.")
+
+        pni = findfirst(x -> x===PhyloNetworks.getParent(net.edge[ei]), net.node) # parent node index
+        edge_xB[ei] = node_x[pni]
+        elen[ei] = node_age[pni] - node_age[ni]
+        edge_xE[ei] = edge_xB[ei] + elen[ei]
+        node_x[ni] = edge_xE[ei]
+    end
+    # then x and yB,yE for each node: x=xE of parent edge
+    xmin = 1.0; xmax=xmin
+    node_x  = zeros(Float64,net.numNodes) # order: in net.nodes, *!not in nodes_changed!*
+    edge_xB = zeros(Float64,net.numEdges) # min (B=begin) and max (E=end)
+    edge_xE = zeros(Float64,net.numEdges) # xE-xB = edge length
+    node_x[net.root] = xmin # root node: x=xmin=0
+    for i=2:length(net.node)              # true pre-order, skipping the root (i=1)
+        ni = findfirst(x -> x===net.nodes_changed[i], net.node)
+        ei = nothing # index of major parent edge of current node
+        for e in net.nodes_changed[i].edge
+            if (e.isMajor && net.nodes_changed[i] == e.node[e.isChild1 ? 1 : 2]) # major parent edge
+                ei = findfirst(x -> x===e, net.edge)
+                break
+            end
+        end
+        ei !== nothing || error("oops, could not find major parent edge of node number $ni.")
+        pni = findfirst(x -> x===PhyloNetworks.getParent(net.edge[ei]), net.node) # parent node index
+        edge_xB[ei] = node_x[pni]
+        elen[ei] = node_age[pni] - node_age[ni]
+        edge_xE[ei] = edge_xB[ei] + elen[ei]
+        node_x[ni] = edge_xE[ei]
+    end
+  
+    for i=1:net.numEdges
+        if (!net.edge[i].isMajor) # minor hybrid edges
+            # indices of child and parent nodes
+            cni = findfirst(x -> x===PhyloNetworks.getChild( net.edge[i]), net.node)
+            pni = findfirst(x -> x===PhyloNetworks.getParent(net.edge[i]), net.node)
+
+            elen[i] = node_x[cni] - node_x[pni]
+            #@show i; @show net.edge[i]; @show pni; @show net.node[pni]; @show cni; @show net.node[cni]
+        end
+    end
+    
+    for i in 1:size(net.edge,1)
+        #print(elen[i])
+        net.edge[i].length = elen[i]
+    end
+
+    return net
+end
+
 net_not_ultrametric = readTopology("(((C:1,(A:1)#H1:1.5::0.7):1,(#H1:0.3::0.3,E:2.0):2.2):1.0,O:5.2);");
 net_ultrametric = readTopology("(10:9.6,(#H1:2.9::0.3,(1:7.2,(2:6.0,((9:5.4,(3:4.4,(4:3.5,((5:0.2,6:0.2):2.1,(7:1.4,8:1.4):0.9):1.2):0.9):1.0):0.1)#H1:0.5::0.7):1.2):1.2):1.2);");
 t25big_not_ultrametric = readTopology("((t23:0.1529152972,(((t5:0.1742374953,((((t7:0.03701669352,t3:0.03701669352):0.3407026256,
@@ -130,19 +404,3 @@ t25big_not_ultrametric = readTopology("((t23:0.1529152972,(((t5:0.1742374953,(((
                                         (((t19:0.02301105435,t14:0.02301105435):0.02867005422,t4:0.05168110857):0.08023888482507495,
                                         #H30:0.0::0.3437113460000474):0.02393732677492505):0.0)#H34:0.00294202294::0.976224958374261):0.1415983706,t25:0.01131692658,
                                         (t24:0.0077794867038045645,#H34:0.0::0.023775041625738957):0.0035374398761954346);")
-
-
-
-function multiplyEdgeLengths!(net, factor)
-    for edge in net.edge
-        edge.length = edge.length * factor
-    end
-end
-
-PhyloNetworks.rootatnode!(t25big_not_ultrametric, "t25")
-makeUltrametric!(t25big_not_ultrametric)
-multiplyEdgeLengths!(t25)
-
-
-arr_net = [net_not_ultrametric, net_ultrametric, t25big_not_ultrametric]
-runTests(arr_net)

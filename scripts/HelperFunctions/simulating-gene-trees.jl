@@ -13,7 +13,7 @@ include("functions.jl")
 hybridlambda = "/Users/Clauberry/Dropbox/software/hybrid-Lambda/src/hybrid-Lambda"
 hybridlambda = "/Users/bjorner/GitHub/hybrid-lambda/src/hybrid-Lambda" # cloned github repo and make
 ##makeultrametric = "/Users/Clauberry/Dropbox/Documents/solislemus-lab/my-projects/present/ransanec/ransanec/scripts/makeultrametric"
-folder = "/Users/bjorner/GitHub/phylo-microbes/data/HyDe_four_taxon/long_branches/" #knownGT/singleNet/"
+folder = "/Users/bjorner/GitHub/phylo-microbes/data/HyDe_four_taxon/long_branches/"
 #folder = "/Users/bjorner/GitHub/phylo-microbes/data/HyDe_four_taxon/long_branches/"
 
 file = "20211109_simpleNetwork"
@@ -36,6 +36,10 @@ elseif file == "n100h20"
     outgroup = "t53" ## t100 has root mismatch
 elseif startswith(file, "long") || startswith(file, "short")
     outgroup = "O"
+elseif startswith(file,"n15")
+    outgroup = "15"
+elseif startswith(file,"n10")
+    outgroup = "10"
 end
 
 
