@@ -22,10 +22,35 @@ function calculate_WC(testReturnsHybrid, isTrueHybridID, isHybridInTriple)
     return testReturnsHybrid && !isTrueHybridID && isHybridInTriple
 end
 
-function calcDpsd_concatenated(x, y, bbaa, nbootstrap=500)
-    n = x+y+bbaa
-    Dp = (x-y)/n
-    p_abba = x/n
+function calcDsd_concatenated(abba, baba, bbaa, outgroup_position, nbootstrap=500)
+    if outgroup_position == 1 || outgroup_position == 2
+        #BBAA - BABA: use BBAA instead of ABBA
+        tempABBA = abba
+        abba = bbaa
+        bbaa = tempABBA
+    end
+    n = abba+baba
+    D = (abba-baba)/n
+    p_abba = abba/n
+    d = Distributions.Binomial(n, p_abba)
+    bx = rand(d, nbootstrap)
+    bD = (2*bx .- n) ./ n # y=n-x so x-y = x-(n-x) = 2x-n
+    z = D / Statistics.std(bD)
+    pvalue = ccdf(Normal(), abs(z))*2
+    return D, z, pvalue
+  end
+
+function calcDpsd_concatenated(abba, abab, bbaa, outgroup_position, nbootstrap=500)
+    # if outgroup position is 3, proceed normally. else, change whether we use abba or aabb. positions 1 and 2 give symmetric results
+    if outgroup_position == 1 || outgroup_position == 2
+        #BBAA - BABA: use BBAA instead of ABBA
+        tempABBA = abba
+        abba = bbaa
+        bbaa = tempABBA
+    end
+    n = abba+abab+bbaa
+    Dp = (abba-abab)/n
+    p_abba = abba/n
     d = Distributions.Binomial(n, p_abba)
     bx = rand(d, nbootstrap)
     bD = (2*bx .- n) ./ n # y=n-x so x-y = x-(n-x) = 2x-n
@@ -102,6 +127,44 @@ function calculateLengthToHybridEdge(net, hybridLabel)
     return tipHeight - hybridHeight
 end
 
+#= HyDe output consists of the following headers describing site pattern frequencies.
+AAAA	AAAB	AABA	AABB	AABC	ABAA	ABAB	ABAC	ABBA	BAAA	ABBC	CABC	BACA	BCAA	ABCD
+To replace analysis of site patterns using classical D3, site patterns can be converted to pairwise distances
+where d1-3, d2-3 can be computed by:
+
+d1-3
+sum over -> AABA AABB AABC CABC BACA BCAA ABCD ABBA BAAA ABBC 
+d2-3
+sum over -> AABA AABB AABC CABC BACA BCAA ABCD ABAB ABAA ABAC 
+
+where AABA AABB AABC CABC BACA BCAA ABCD are equal between d1-3 and d2-3
+=#
+function calcD3fromHyDe(AABA,	AABB,	AABC,	ABAA,	ABAB,	ABAC,	ABBA,	BAAA,	ABBC,	CABC,	BACA,	BCAA,	ABCD, relative_outgroup, nbootstrap=500)
+    # if relative outgroup is in position 3, proceed normally
+    dCommon = AABA + AABB + AABC + CABC + BACA + BCAA + ABCD 
+    d13 = dCommon + ABBA + BAAA + ABBC
+    d23 = dCommon + ABAB + ABAA + ABAC
+    d12 = ABAA + ABAB + ABAC + BAAA + ABBC + ABBA + CABC + BACA + BCAA + ABCD
+
+    # if relative outgroup is in position 1, compute D3 with d12 (== d23) and d13.
+    if relative_outgroup == 1      
+        d23 = d12
+    elseif relative_outgroup == 2 # compute D3 with d12 and d23
+        d13 = d12
+    end
+
+    n = d13 + d23
+    D3 = (d13 - d23) / n
+    p_d13 = d13 / n
+    d = Distributions.Binomial(n, p_d13)
+    bx = rand(d, nbootstrap)
+    bD3 = (2*bx .- n) ./ n # y=n-x so x-y = x-(n-x) = 2x-n
+    z = D3 / Statistics.std(bD3)
+    pvalue = ccdf(Normal(), abs(z))*2
+
+    return D3, z, pvalue
+end
+
 #=
 Returns Tip:Root / Hybrid:Root ratio assuming ultrametric tree with all nodes
 =#
@@ -161,7 +224,7 @@ function isGhostHybrid(net, hybridlabel)
     PhyloNetworks.directEdges!(net)
     hybridclade = hardwiredCluster(net.hybrid[hybridlabel].edge[1], tipLabels(net))
     hybridtips = tipLabels(net)[hybridclade]
-    print("\n hybrid tips are: ", hybridtips)
+    # print("\n hybrid tips are: ", hybridtips)
     # step 2 is find the clades downstream of the node / downstream of the hybrid
     # parent of minor hybrid edge:
     parentnode = PhyloNetworks.getParent(net.hybrid[hybridlabel].edge[1]) 
@@ -171,15 +234,45 @@ function isGhostHybrid(net, hybridlabel)
     
     downstreamclades = PhyloNetworks.hardwiredCluster(parentnode.edge[3], tipLabels(net))
     downstreamtips = tipLabels(net)[downstreamclades]
-    print("\n downstreamtips are", downstreamtips)
+    # print("\n downstreamtips are", downstreamtips)
     if issubset(hybridtips, downstreamtips) 
         return true
     else
-        print("\n hybrid tips are ", hybridtips)
-        print("\n downstream tips are ", downstreamtips)
+        # print("\n hybrid tips are ", hybridtips)
+        # print("\n downstream tips are ", downstreamtips)
         return false
     end
 end
+
+#=
+The D3 statistic intends to be tested on events where the sister taxa are distinct from the 
+outgroup. D3 will behave differently (give false positives) if the underlying species tree
+is different than expected. Here, we test for a topology matching ((tax1,tax2),out) where
+both taxon 1 and taxon 2 (labels of leaves) are sister with the common outgroup "out" by
+ensuring the distance in the network's major tree from tax1->out == tax2->out
+=#
+function isSisterSisterOutgroup(tax1,tax2,out,net::HybridNetwork)
+    majorNet = majorTree(net)
+    for l in tipLabels(net)
+        if l ∉ [tax1, tax2, out]
+            PhyloNetworks.deleteleaf!(majorNet,l,keeporiginalroot=true, simplify=true);
+            #@show net
+        end 
+    end 
+    taxonPairwiseMatrix = PhyloNetworks.pairwiseTaxonDistanceMatrix(majorNet)
+    tipOrder = tipLabels(majorNet)
+
+
+    tax1TipOrder = findall(x->x==tax1, tipOrder)[1]
+    tax2TipOrder = findall(x->x==tax2, tipOrder)[1]
+    outTipOrder = findall(x->x==out, tipOrder)[1]
+
+    distTax1ToOut = taxonPairwiseMatrix[tax1TipOrder*outTipOrder]
+    distTax2ToOut = taxonPairwiseMatrix[tax2TipOrder*outTipOrder]
+   
+    return abs(distTax1ToOut - distTax2ToOut) < 0.01
+end
+
 
 #=
 get length of minor hybrid edge of specified hybrid
@@ -212,7 +305,11 @@ function analyzeHyDe_DStat(filepath, filename, netname, savefilepath)
     column_names = [:P1, :Hybrid, :P2, :FP, :FN, :TP, :TN, :WC, :FP_bon, :FN_bon, :TP_bon, :TN_bon, :WC_bon, 
                     :hybridTripletExpected, :proposedHybridCorrect, :isGhostHybrid, :isGhostAtRoot, 
                     :isMultiHybrid, :lengthToHybridEdge, :tipToHybridRatio, 
-                    :D, :D_z, :D_pvalue, :Dp, :Dp_z, :Dp_pvalue, :true_gamma, :proposed_gamma]
+                    :D, :D_z, :D_pvalue, :Dp, :Dp_z, :Dp_pvalue, :D3, :D3_z, :D3_pvalue, 
+                    :FP_D, :FN_D, :TP_D, :TN_D, :FP_Dbon, :FN_Dbon, :TP_Dbon, :TN_Dbon, 
+                    :FP_Dp, :FN_Dp, :TP_Dp, :TN_Dp, :FP_Dpbon, :FN_Dpbon, :TP_Dpbon, :TN_Dpbon, 
+                    :FP_D3, :FN_D3, :TP_D3, :TN_D3, :FP_D3bon, :FN_D3bon, :TP_D3bon, :TN_D3bon, 
+                    :true_gamma, :proposed_gamma, :isDtestTopology]
 
     # add all names to dataframe as empty columns
     df_results = DataFrame(column_names .=> Ref([]))
@@ -236,7 +333,7 @@ function analyzeHyDe_DStat(filepath, filename, netname, savefilepath)
 
         lengthToHybridEdge, tipToHybridRatio = -1, -1
 
-        for i in  1:net.numHybrids
+        for i in 1:net.numHybrids
             if i == 2
                 isMultiHybrid = true
             end
@@ -259,30 +356,146 @@ function analyzeHyDe_DStat(filepath, filename, netname, savefilepath)
         ABAB_site = HyDeOut[row,:ABAB]
         BBAA_site = HyDeOut[row,:AABB]
 
+        AABA = HyDeOut[row,:AABA]
+        AABB = HyDeOut[row,:AABB]	
+        AABC = HyDeOut[row,:AABC]	
+        ABAA = HyDeOut[row,:ABAA]	
+        ABAB = HyDeOut[row,:ABAB]	
+        ABAC = HyDeOut[row,:ABAC]	
+        ABBA = HyDeOut[row,:ABBA]	
+        BAAA = HyDeOut[row,:BAAA]	
+        ABBC = HyDeOut[row,:ABBC]	
+        CABC = HyDeOut[row,:CABC]	
+        BACA = HyDeOut[row,:BACA]	
+        BCAA = HyDeOut[row,:BCAA]	
+        ABCD = HyDeOut[row,:ABCD]
+
+
+        # D-statistics should only be calculated where the correct topology is followed. 
+        isCorrectDTopology_pos3 = isSisterSisterOutgroup(P1, Hybrid, P2, net)
+        isCorrectDTopology_pos1 = isSisterSisterOutgroup(P2, Hybrid, P1, net)
+
+        outgroup_position = 0
+        if isCorrectDTopology_pos1 
+            outgroup_position = 1
+        elseif isCorrectDTopology_pos3
+            outgroup_position = 3
+            # triplet is in the correct order
+        else
+            outgroup_position = 2
+        end
+
+        D, D_z, D_pvalue = calcDsd_concatenated(ABBA_site, ABAB_site, BBAA_site, outgroup_position)
+        Dp, Dp_z, Dp_pvalue = calcDpsd_concatenated(ABBA_site, ABAB_site, BBAA_site, outgroup_position)
+        D3, D3_z, D3_pvalue = calcD3fromHyDe(AABA,	AABB,	AABC,	ABAA,	ABAB,	ABAC,	ABBA,	BAAA,	ABBC,	CABC,	BACA,	BCAA,	ABCD, outgroup_position)
+  
         # bootstrap option to calculate D, z-score, and p-value
-        D, D_z, D_pvalue = calcDsd_concatenated(ABBA_site, ABAB_site)
-        Dp, Dp_z, Dp_pvalue = calcDpsd_concatenated(ABBA_site,ABAB_site,BBAA_site)
+        #=
+        FP_D, FN_D, TP_D, TN_D = calculateD_FP_FN_TP_TN(D, hybridTripletExpected, 0.05 > D_pvalue, net)
+        FP_Dbon, FN_Dbon, TP_Dbon, TN_Dbon = calculateD_FP_FN_TP_TN(D, hybridTripletExpected, (0.05 * 3 / setsOfTriplets) > D_pvalue, net)
+
+        FP_Dp, FN_Dp, TP_Dp, TN_Dp = calculateD_FP_FN_TP_TN(Dp, hybridTripletExpected, 0.05 > Dp_pvalue, net)
+        FP_Dpbon, FN_Dpbon, TP_Dpbon, TN_Dpbon = calculateD_FP_FN_TP_TN(Dp, hybridTripletExpected, (0.05 * 3 / setsOfTriplets) > Dp_pvalue, net)
+
+        FP_D3, FN_D3, TP_D3, TN_D3 = calculateD_FP_FN_TP_TN(D3, hybridTripletExpected, 0.05 > D3_pvalue, net)
+        FP_D3bon, FN_D3bon, TP_D3bon, TN_D3bon = calculateD_FP_FN_TP_TN(D3, hybridTripletExpected, (0.05 * 3 / setsOfTriplets) > D3_pvalue, net)
+        =#
+
+        FP_D, FN_D, TP_D, TN_D = calculate_FP_FN_TP_TN(0.05 > D_pvalue, hybridTripletExpected)
+        FP_Dbon, FN_Dbon, TP_Dbon, TN_Dbon = calculate_FP_FN_TP_TN((0.05 * 3 / setsOfTriplets) > D_pvalue, hybridTripletExpected)
+
+        FP_Dp, FN_Dp, TP_Dp, TN_Dp = calculate_FP_FN_TP_TN(0.05 > Dp_pvalue, hybridTripletExpected)
+        FP_Dpbon, FN_Dpbon, TP_Dpbon, TN_Dpbon = calculate_FP_FN_TP_TN((0.05 * 3 / setsOfTriplets) > Dp_pvalue, hybridTripletExpected)
+
+        FP_D3, FN_D3, TP_D3, TN_D3 = calculate_FP_FN_TP_TN(0.05 > D3_pvalue, hybridTripletExpected)
+        FP_D3bon, FN_D3bon, TP_D3bon, TN_D3bon = calculate_FP_FN_TP_TN((0.05 * 3 / setsOfTriplets) > D3_pvalue, hybridTripletExpected)
+
+        isCorrectDTopology = outgroup_position
         
         push!(df_results, [P1, Hybrid, P2, FP, FN, TP, TN, WC, FP_bon, FN_bon, TP_bon, TN_bon, WC_bon,
-                           hybridTripletExpected, proposedHybridCorrect, isGhostHybridBool, isGhostHybridAtRootBool, isMultiHybrid, 
+                           hybridTripletExpected, proposedHybridCorrect, isGhostHybridBool, 
+                           isGhostHybridAtRootBool, isMultiHybrid, 
                            lengthToHybridEdge, tipToHybridRatio, 
-                           D, D_z, D_pvalue, Dp, Dp_z, Dp_pvalue, true_gamma, proposed_gamma])
+                           D, D_z, D_pvalue, Dp, Dp_z, Dp_pvalue, D3, D3_z, D3_pvalue, 
+                           FP_D, FN_D, TP_D, TN_D, FP_Dbon, FN_Dbon, TP_Dbon, TN_Dbon, 
+                           FP_Dp, FN_Dp, TP_Dp, TN_Dp, FP_Dpbon, FN_Dpbon, TP_Dpbon, TN_Dpbon, 
+                           FP_D3, FN_D3, TP_D3, TN_D3, FP_D3bon, FN_D3bon, TP_D3bon, TN_D3bon, 
+                           true_gamma, proposed_gamma, isCorrectDTopology])
     end
 
     CSV.write(string(outFile), df_results)
 end
 
+#=
+Given separate D-statistics, calculation of true positives, negatives, etc.
+is dependent on whether it matches the species topology required of the D-statistic, 
+as well as if there is a hybrid between the implicated clades in either direction
+
+for positive D statistics, (excess of ABBA) indicates introgression between taxon2 and taxon3
+for negative D statistics, (excess of BABA/"ABAB" in the case of HyDe) 
+indicates introgression between taxon1 and taxon3 in either direction
+
+TODO: method can also be altered to test for whether introgression is between two implicated groups, for now tests if there is a hybrid
+present within the triple tested, given the correct topology.
+=#
+function calculateD_FP_FN_TP_TN(D_statistic, actualHybrid, isSignificant, net)
+    
+    FP, FN, TP, TN = 0, 0, 0, 0
+
+    #=
+    t1isHyb = isTrueHybrid(net, triple[1])
+    t2isHyb = isTrueHybrid(net, triple[2])
+    t3isHyb = isTrueHybrid(net, triple[3])
+
+    =#
+
+    #=
+    if isSignificant
+        if D_statistic > 0 # ABBA > BABA 
+            if t2isHyb || t3isHyb # AND: these should have a hybrid edge between them, not one caused by ghost hybridization
+                TP = 1
+            else
+                FP = 1 
+            end
+        elseif D_statistic < 0 # BABA > ABBA
+            if t1isHyb || t3isHyb # AND: these should have a hybrid edge between them, not one caused by ghost hybridization
+                TP = 1
+            else
+                FP = 1
+            end
+        end
+    else # is not significant
+        if t1isHyb || t2isHyb || t3isHyb
+            FN = 1
+        else
+            TN = 1
+        end
+    end
+    =#
+
+    TP = isSignificant && actualHybrid
+    FP = isSignificant && !actualHybrid
+    TN = !isSignificant && !actualHybrid
+    FN = !isSignificant && actualHybrid
+
+    return FP, FN, TP, TN
+
+end
+
+#=
+=#
 function analyzeTICR_MSC(filepath, filename, netname, savefilepath)
     TICR_MSC_Out = DataFrame(CSV.File(filepath))
     net = loadNet(netname)
     outFile = string(savefilepath, filename, "_analyzed.csv")
 
-    sig05 = isSignificant(TICR_MSC_Out[!, :Pvalue], 0.05)
-    sig_bonferroni = isSignificantBonferroni(TICR_MSC_Out[!, :Pvalue], 0.05)
+    sig05 = isSignificant(TICR_MSC_Out[!, :MSC_pVal], 0.05)
+    sig_bonferroni = isSignificantBonferroni(TICR_MSC_Out[!, :MSC_pVal], 0.05)
 
     setsOfQuartets = size(TICR_MSC_Out,1)
 
-    column_names = [:t1, :t2, :t3, :t4, :FP, :FN, :TP, :TN, :WC, :FP_bon, :FN_bon, :TP_bon, :TN_bon, :WC_bon, 
+    column_names = [:T1, :T2, :T3, :T4, :TICR_pvalue_individual, :TICR_pvalue, :MSC_pvalue,
+                     :FP, :FN, :TP, :TN, :FP_bon, :FN_bon, :TP_bon, :TN_bon, 
                     :hybridQuadExpected, :isGhostHybrid, :isGhostAtRoot, 
                     :isMultiHybrid, :lengthToHybridEdge, :tipToHybridRatio, 
                     :true_gamma]
@@ -299,19 +512,11 @@ function analyzeTICR_MSC(filepath, filename, netname, savefilepath)
         T4 = string(TICR_MSC_Out[row, :t4]);
         quartet = [T1,T2,T3,T4];
 
-        colNames = names(MSCOutFile)
-        
-        # index of 12|34, 13|24, 14|23
-        CF1234 = findall(x -> x== "12|34", colNames)[1]
-        CF1324 = findall(x -> x== "13|24", colNames)[1]
-        CF1423 = findall(x -> x== "14|23", colNames)[1]
-        pVal   = findall(x -> x== "p_T3", colNames)[1]
-
         hybridQuadExpected = isHybrid!(net, quartet)
         isGhostHybridBool = false
         isMultiHybrid = false
         isGhostHybridAtRootBool = false
-        lengthToHybridEdge, tipToHybridRatio = -1, -1
+        lengthToHybridEdge, tipToHybridRatio, true_gamma = -1, -1, -1
 
         for i in  1:net.numHybrids
             if i == 2
@@ -324,55 +529,18 @@ function analyzeTICR_MSC(filepath, filename, netname, savefilepath)
             isGhostHybridAtRootBool = isGhostHybridAtRoot(net) # this means that there is a hybrid present not ""between"" tested taxa
         end
 
-        
-        # hybrid table is a little messier
-        
-        MSCDF = DataFrame(CF12_34 = Float64[],  CF13_24 = Float64[], CF14_23 = Float64[], Pval = Float64[], hybrid = Float64[])
-        hybridMSC = Vector{Bool}(undef, size(expectedVals, 1))
+        FP, FN, TP, TN = calculate_FP_FN_TP_TN(sig05[row], hybridQuadExpected)
+        FP_bon, FN_bon, TP_bon, TN_bon = calculate_FP_FN_TP_TN(sig_bonferroni[row], hybridQuadExpected)
 
-        
-        # for every row in the ticrout table so far 
-        # iterNum = 0
-        for row in 1:setsOfQuartets
-        
-            # extract the names of the 4 taxa
-            t1 = string(TicrOut[row, 1])
-            t2 = string(TicrOut[row, 2])
-            t3 = string(TicrOut[row, 3])
-            t4 = string(TicrOut[row, 4])
-        
-            foundFlag = false
-            rowMSC = 0
-        
-            # index of t1,2,3,4 in MSCOut:
-            t1Index = findall(x -> x==t1, colNames)[1]
-            t2Index = findall(x -> x==t2, colNames)[1]
-            t3Index = findall(x -> x==t3, colNames)[1]
-            t4Index = findall(x -> x==t4, colNames)[1]
-        
-            while (!foundFlag) && (rowMSC < setsOfQuartets)
-                # iterNum = iterNum + 1
-                # println(iterNum)
-        
-                rowMSC = rowMSC + 1
-                # look at only the column names matching t1/2/3/4
-                if (MSCOut[rowMSC, t1Index] == 1) && (MSCOut[rowMSC, t2Index] == 1) && (MSCOut[rowMSC, t3Index] == 1) && (MSCOut[rowMSC, t4Index] == 1)
-                    # add row to the list!
-                    foundFlag = true
-                    # index of 12|34, 13|24, 14|23
-                    if MSCOut[rowMSC, pVal] < parse(Float64,alpha)
-                        hybrid = 1
-                    else
-                        hybrid = 0
-                    end
-        
-                    global MSCDF
-                    global MSCOut
-                    MSCDF = push!(MSCDF, [MSCOut[rowMSC, CF1234], MSCOut[rowMSC, CF1324], MSCOut[rowMSC, CF1423], MSCOut[rowMSC, pVal], hybrid])
-                end
-            end 
-        end
-        
+        TICR_pvalue_individual = TICR_MSC_Out[row, :pValTicr]
+        TICR_pvalue = TICR_MSC_Out[row, :overallPval]
+        MSC_pvalue = TICR_MSC_Out[row, :MSC_pVal]
+
+        push!(df_results, [T1, T2, T3, T4, TICR_pvalue_individual, TICR_pvalue, MSC_pvalue, FP, FN, TP, TN,
+                     FP_bon, FN_bon, TP_bon, TN_bon, 
+                    hybridQuadExpected, isGhostHybridBool, isGhostHybridAtRootBool, 
+                    isMultiHybrid, lengthToHybridEdge, tipToHybridRatio, 
+                    true_gamma])
     end
 
     CSV.write(string(outFile), df_results)
@@ -381,11 +549,10 @@ end
 function main(pathToFile::String, splitby, pathToSaveFile)
     #filename is set up with the format string(netname,"/-gt", num_gene_trees, "-1-1.tre...", HyDe_Dstat.csv
     filename = split(pathToFile, "/")[size(split(pathToFile, "/"), 1)]
-    print(filename)
-    netname = split(filename, splitby)[1]
-    if contains(filename, "HyDe")
+    method, netname, netsize, gt_number, trial_number = extractMethodDetails(filename)
+    if contains(filename, "HyDe") && contains(filename, ".csv") !contains(filename, "time") && !contains(filename, "50h10")
         analyzeHyDe_DStat(pathToFile, filename, netname, pathToSaveFile)
-    elseif contains(filename, "TICR_MSC")
+    elseif contains(filename, "TICR_MSC") && contains(filename, ".csv") && !contains(filename, "time") && !contains(filename, "50h10")
         analyzeTICR_MSC(pathToFile, filename, netname, pathToSaveFile)
     else
         print("input file ", filename, " was not analyzed: does not fit naming conventions")
@@ -393,7 +560,154 @@ function main(pathToFile::String, splitby, pathToSaveFile)
 end
 
 
+netNameSplit="-"
+savePath="/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/ms_short_output_analyzed/" # will save in current directory unless otherwise specified
+# conduct batch analysis from list of input files
+file_of_analyzed_files = "/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/analyzed_files.txt"
+list_output_files = Vector(CSV.File(file_of_analyzed_files, header=false))
+for file in list_output_files
+    main(file[1], netNameSplit, savePath)
+end
 
-netNameSplit="_"
-savePath="analyzeMethodOutputFile/" # will save in current directory unless otherwise specified
-main(ARGS[1], netNameSplit, savePath)
+
+#=
+Tally true positives and negatives from analyzed files creating a file in the form of :
+method     network    networksize    trial   true positives   true negatives   false positives  false negatives   wrong clades
+=#
+function summaryTableTICR(list_output_files)
+    column_names = [:network_name, :net_size, :seq_length, :trial_num, 
+    :FP, :FN, :TP, :TN, :FP_bon, :FN_bon, :TP_bon, :TN_bon, :TICR_pval]
+    
+    summary_table = DataFrame(column_names .=> Ref([]))
+
+    for file in list_output_files
+        filename = split(file[1], "/")[size(split(file[1], "/"), 1)]
+       # print(filename)
+        if contains(filename, "analyzed")
+            method, netname, netsize, gt_number, trial_number = extractMethodDetails(filename)
+            if contains(filename, "TICR")
+                file = DataFrame(CSV.File(file[1]))
+
+                FP = sum(file[!, :FP])
+                FN = sum(file[!, :FN])
+                TP = sum(file[!, :TP])
+                TN = sum(file[!, :TN])
+            
+                FP_bon = sum(file[!, :FP_bon])
+                FN_bon = sum(file[!, :FN_bon])
+                TP_bon = sum(file[!, :TP_bon])
+                TN_bon = sum(file[!, :TN_bon])
+
+                TICR_pval = file[1, :TICR_pvalue]
+
+                push!(summary_table, [netname, netsize, gt_number, trial_number,
+                    FP, FN, TP, TN, FP_bon, FN_bon, TP_bon, TN_bon, TICR_pval])
+            end
+        end
+    end
+    CSV.write(string("summary_table_TICR_MSC08022022.csv"), summary_table)
+
+end
+
+
+function extractMethodDetails(filename::AbstractString)
+    netname=split(filename, "-")[1]
+
+    regex_netsize = r"n\d*"
+    netsize = match(regex_netsize, netname)
+    netsize = split(netsize.match, "n")[2]
+
+    gt_number=split((split(filename, "-gt")[2]), "-")[1]
+    regex_trial = r"\d*.tre"
+    trial_number = match(regex_trial, filename)
+    trial_number = split(trial_number.match, ".tre")[1]
+    
+    possible_methods = ["HyDe", "D3", "TICR", "MSC"]
+    method=nothing
+    for met in possible_methods
+        if contains(filename, met)
+            method = met
+        end
+    end
+
+    return method, netname, netsize, gt_number, trial_number
+end
+
+function summaryTableHyDe(list_output_files) 
+
+    column_names = [:network_name, :net_size, :seq_length, :trial_num, 
+               :FP, :FN, :TP, :TN, :WC, :FP_bon, :FN_bon, :TP_bon, :TN_bon, :WC_bon,
+               :FP_D, :FN_D, :TP_D, :TN_D, :FP_Dbon, :FN_Dbon, :TP_Dbon, :TN_Dbon, 
+               :FP_Dp, :FN_Dp, :TP_Dp, :TN_Dp, :FP_Dpbon, :FN_Dpbon, :TP_Dpbon, :TN_Dpbon, 
+               :FP_D3, :FN_D3, :TP_D3, :TN_D3, :FP_D3bon, :FN_D3bon, :TP_D3bon, :TN_D3bon]
+    
+    summary_table = DataFrame(column_names .=> Ref([]))
+
+
+    for file in list_output_files
+        filename = split(file[1], "/")[size(split(file[1], "/"), 1)]
+        if contains(filename, "analyzed")
+            method, netname, netsize, gt_number, trial_number = extractMethodDetails(filename)
+            if contains(filename, "HyDe")
+            file = DataFrame(CSV.File(file[1]))
+    ### HyDe   
+    HyDe_FP = sum(file[!, :FP])
+    HyDe_FN = sum(file[!, :FN])
+    HyDe_TP = sum(file[!, :TP])
+    HyDe_TN = sum(file[!, :TN])
+    HyDe_WC = sum(file[!, :WC])
+
+    HyDe_FPbon = sum(file[!, :FP_bon])
+    HyDe_FNbon = sum(file[!, :FN_bon])
+    HyDe_TPbon = sum(file[!, :TP_bon])
+    HyDe_TNbon = sum(file[!, :TN_bon])
+    HyDe_WCbon = sum(file[!, :WC_bon])
+    ### D-statistic
+
+   # FP_D,FN_D,TP_D,TN_D,FP_Dbon,FN_Dbon,TP_Dbon,TN_Dbon,FP_Dp,FN_Dp,TP_Dp,TN_Dp,FP_Dpbon,FN_Dpbon,TP_Dpbon,TN_Dpbon,FP_D3,FN_D3,TP_D3,TN_D3,FP_D3bon,FN_D3bon,TP_D3bon,TN_D3bon
+    
+    Dstat_FP = sum(file[!, :FP_D])
+    Dstat_FN = sum(file[!, :FN_D])
+    Dstat_TP = sum(file[!, :TP_D])
+    Dstat_TN = sum(file[!, :TN_D])
+
+    Dstat_FPbon = sum(file[!, :FP_Dbon])
+    Dstat_FNbon = sum(file[!, :FN_Dbon])
+    Dstat_TPbon = sum(file[!, :TP_Dbon])
+    Dstat_TNbon = sum(file[!, :TN_Dbon])
+    ### Dp
+    Dp_FP = sum(file[!, :FP_Dp])
+    Dp_FN = sum(file[!, :FN_Dp])
+    Dp_TP = sum(file[!, :TP_Dp])
+    Dp_TN = sum(file[!, :TN_Dp])
+
+    Dp_FPbon = sum(file[!, :FP_Dpbon])
+    Dp_FNbon = sum(file[!, :FN_Dpbon])
+    Dp_TPbon = sum(file[!, :TP_Dpbon])
+    Dp_TNbon = sum(file[!, :TN_Dpbon])
+    ### D3
+    D3_FP = sum(file[!, :FP_D3])
+    D3_FN = sum(file[!, :FN_D3])
+    D3_TP = sum(file[!, :TP_D3])
+    D3_TN = sum(file[!, :TN_D3])
+
+    D3_FPbon = sum(file[!, :FP_D3bon])
+    D3_FNbon = sum(file[!, :FN_D3bon])
+    D3_TPbon = sum(file[!, :TP_D3bon])
+    D3_TNbon = sum(file[!, :TN_D3bon])
+
+    push!(summary_table, [netname, netsize, gt_number, trial_number,
+        HyDe_FP, HyDe_FN, HyDe_TP, HyDe_TN, HyDe_WC,
+        HyDe_FPbon, HyDe_FNbon, HyDe_TPbon, HyDe_TNbon, HyDe_WCbon,
+        Dstat_FP, Dstat_FN, Dstat_TP, Dstat_TN, Dstat_FPbon, Dstat_FNbon, Dstat_TPbon, Dstat_TNbon,
+        Dp_FP, Dp_FN, Dp_TP, Dp_TN, Dp_FPbon, Dp_FNbon, Dp_TPbon, Dp_TNbon,
+        D3_FP, D3_FN, D3_TP, D3_TN, D3_FPbon, D3_FNbon, D3_TPbon, D3_TNbon])
+        end
+    end
+end
+    
+    CSV.write(string("/Users/bjorner/github/phylo-microbes/scripts/CHTCFunctions/summary_table_HyDe_short.csv"), summary_table)
+end 
+
+# julia analyzeMethodOutputFile.jl 
+
