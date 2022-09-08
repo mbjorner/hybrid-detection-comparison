@@ -6,28 +6,11 @@ universe = vanilla
 #tempProcess = $(Process) + 1
 #newProcess = $INT(tempProcess)
 
-
 ### inputs
-
-    # network
-    #network=10
-
-    # map is either n10h2map.txt, n15h3map.txt, n25h5map.txt, or n50h10map.txt, n6h1map.txt
-    #map=n10h2map.txt
-
-    # true net is either: n10.net, n15.net, n25h5_1.net, 50h10_1.net, n10orange_1.net n15blue.net, n15red.net, n15orange.net
-    #true_net=n10.net
-
-    #num_trees=30
-
-     # network
-    network=4
-    map=fourTreeMap.txt
-    true_net=fourTreeNet.net
-
-    #this is arbitrary
-    num_trees=50 
-
+num_taxa=25
+map_name=n25h5map.txt
+true_net=n25h5.net
+folder_name=n25h5
 
 log = logs/job_$(Cluster)_$(true_net)_$(num_trees).log
 error = logs/job_$(Cluster)_$(newProcess).err
@@ -42,30 +25,27 @@ executable = chtc_phylo.sh
 # all_hybs/n$(network)_n$(num_trees)/$(newProcess)_astral.in
 # input/all_hybs/n$(network)_n$(num_trees)/$(newProcess)_astral.in
 
-transfer_input_files = output/, input/long_branches/$(process), julia-1.6.1-linux-x86_64.tar.gz,\
+transfer_input_files = output/, nets_newick/$(true_net), directory/$(folder_name).txt, directory/n25seq.txt, maps_hyde/$(map_name), input/$(folder_name)/$(process), julia-1.6.1-linux-x86_64.tar.gz,\
     my-project-julia.tar.gz, chtc_TICR.jl, http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz,\
     packages.tar.gz, chtc_MSCquartets.R, http://proxy.chtc.wisc.edu/SQUID/bjorner/HyDe.tar.gz,\
-    run_hyde.py, $(map), Seq-Gen-1.3.4.tar.gz, $(true_net), TICR.tar.gz, chtc_cfTable.jl, find-cut-Linux-64,\
+    run_hyde.py, Seq-Gen-1.3.4.tar.gz, TICR.tar.gz, chtc_cfTable.jl, find-cut-Linux-64,\
+    d1_d2.py, D3_D_combinations.py, \
     chtc_expected_cfTable.jl, chtc_HyDe_Dstat_table.jl, chtc_TICRMSC_table.jl, seqgen2hyde.py
 
 ### arguments: input file, map, network,    e.g. n15orange-gt$(num_trees)-$(newProcess)-1.tre, $(newProcess)_astral.in
-arguments = $(process) $(map) $(network) $(num_trees) $(true_net) $(process)
-#$(newProcess) 
+arguments = $(process) $(map_name) $(num_taxa) $(true_net)
 
-# $(seq_length)
+# need for cpus, disk, and memory changes based on the size of the network and
+# number of gene trees used. Typically, larger networks wtih more than 3000 gene trees require more
+# memory and disk space
 
-# need for cpus, disk, and memory changes
-
-request_cpus = 2
-# trees >3000 require more memory and disk space; 16gb too low, 32gb too low for 3000.
-request_memory = 64GB
-request_disk = 64GB
-
-#request_cpus = 2
-#request_memory = 16GB
-#request_disk = 16GB
+request_cpus = 1
+request_memory = 8GB
+request_disk = 8GB
 
 # number to run
+
+####### QUEUE PROCESSES FROM NUMBER OR TEXT FILE
 # queue 30
 
-queue process from long_branch_files.txt
+queue process from directory/n25seq.txt

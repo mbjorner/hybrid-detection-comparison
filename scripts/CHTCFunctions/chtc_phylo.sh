@@ -7,75 +7,21 @@
 # gene_trees: used for TICR, HyDe, and MSCquartets
 # map: used for HyDe
 # network: identifier used for file naming/organization
-# num_gene_trees: identifier used for file naming/organization
 
 #inputs:
 gene_trees=$1
-network=$3
-num_gene_trees=$4
-true_network=$5
-num_trial=$6
+map=$2
+num_taxa=$3
+true_network=$4
 
 significance=0.05
 
-## HYDE
-
-#variables: 
-# seqgen 
-seed=275890
-
-
-## seqgen: 
-# output - .log and .out files.
-# .out is used for HyDe
+###### HYDE / D-Statistic ######
 
 # unpack tarred files
 export WORKDIR=$PWD
 tar -xzf Seq-Gen-1.3.4.tar.gz
-
-# creates makefile
-#cd Seq-Gen-1.3.4 
-#cd source
-#make
-
 cd $WORKDIR
-
-#cd Seq-Gen-1.3.4 
-#cd source
-#ls
-
-#chmod +x ./Seq-Gen-1.3.4/source/seq-gen
-
-# use same theta as hyde _ 0.01
-# use -q option
-# test on 4 taxon tree
-
-for j in 15000 30000 60000 105000 255000 510000
-do
-   length=$(($INT($j)/$INT($4)))
-   seqgen_out=${j}_${gene_trees}_${network}_${num_gene_trees}_seqgen.out
-   ./Seq-Gen-1.3.4/source/seq-gen -mGTR -r 1.0 0.2 10.0 0.75 3.2 1.6 -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -l${length} -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
-   
-   #echo $length
-   #echo "is length specified"
-
-   # OLD PARAMS
-   # -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l${j} -s0.018 -n1 -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
-   echo "${seqgen_out}"
-done
-
-for j in 1000 2000 5000 10000 50000 100000 500000 800000 1000000 1500000
-do
-   seqgen_out=${j}_${gene_trees}_${network}_${num_gene_trees}_seqgen.out
-   ./Seq-Gen-1.3.4/source/seq-gen -mGTR -s 0.01 -r 1.0 0.2 10.0 0.75 3.2 1.6 -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -l${j} -q < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
-
-   # OLD PARAMS
-   # -mHKY -t2.0 -f0.300414,0.191363,0.196748,0.311475 -l${j} -s0.018 -n1 -z${seed} < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_${network}_${num_gene_trees}_seqgen.log
-   echo "${seqgen_out}"
-done
-
-# have job exit if any command returns with non-zero exit status (aka failure)
-# set -e
 
 # replace env-name on the right hand side of this line with the name of your conda environment
 ENVNAME=HyDe
@@ -88,72 +34,48 @@ ENVDIR=$ENVNAME
    tar -xzf $ENVNAME.tar.gz -C $ENVDIR
    . $ENVDIR/bin/activate
 
- # run HyDe script using inputs
-   input=${gene_trees}_${network}_${num_gene_trees}_seqgen.out
-   map=$2
-   num_taxa=$3
-
 # for n10, out = 10; n15=15, n25=25, n50=50, n100=53
    outgroup=$3
-   case "$3" in
-      100) outgroup=t53
+   case "$outgroup" in
+      100) outgroup=53
       ;;
-      25) outgroup=t25
+      25) outgroup=25
       ;;
-      50) outgroup=t50
+      50) outgroup=50
       ;;
-      5) outgroup=E
+      5) outgroup=5
       ;;
-      4) outgroup=O
+      4) outgroup=4
       ;;
    esac
 
+seqgen_output=$1
 
-# modify this line to run your desired Python script and any other work you need to do
-
-for i in 15000 30000 60000 105000 255000 510000
+# where $3 is the number of taxa in the network OR the map file if the taxa names are non-integers
+boolHyde=0
+timefile=${seqgen_output}_HyDe_time.txt
+for i in 3000 10000 50000 100000 250000 500000
 do
-   echo "$i"
-   seqgen_output=${i}_${gene_trees}_${network}_${num_gene_trees}_seqgen.out
-   hyde_input=${i}_${gene_trees}_${network}_${num_gene_trees}_seqgen_concatenated.out
-   
-   python seqgen2hyde.py ${seqgen_output} ${hyde_input} $3
-   
-   run_hyde.py -i ${hyde_input} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s ${i} --prefix $1_$3_$4_${i}_HyDe
+   j="$i"
+   if [ "${seqgen_output}" == *"-gt${j}-"*"out" ] 
+   then
+      echo "running HyDe on ${seqgen_output}"
+      # python seqgen2hyde.py ${seqgen_output} ${hyde_input} ${map_file} # no longer needed
+      { time run_hyde.py -i ${seqgen_output} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s ${i} --prefix ${gene_trees}_HyDe ; } 2> ${timefile}
+      HyDeOut=${gene_trees}_HyDe-out.txt
+      # timefile=${seqgen_output}_D3_D_time.txt
+      # { time python D3_D_combinations.py ${seqgen_output} ${map} ; } 2> ${timefile}
 
-   HyDeOut=$1_$3_$4_${i}_HyDe-out.txt #verify thisdone
+      boolHyde=1
+   fi
 done
 
-for i in 1000 2000 5000 10000 50000 100000 500000 800000 1000000 1500000
-do
-   echo "$i"
-   seqgen_output=${i}_${gene_trees}_${network}_${num_gene_trees}_seqgen.out
-   hyde_input=${i}_${gene_trees}_${network}_${num_gene_trees}_seqgen_concatenated.out
-   
-   python seqgen2hyde.py ${seqgen_output} ${hyde_input} $3
-   
-   size=$(($INT($i)*$INT($4)))
 
-   run_hyde.py -i ${hyde_input} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_taxa} -s ${size} --prefix $1_$3_$4_${i}_HyDe
+#exit environment
 
-   HyDeOut=$1_$3_$4_${i}_HyDe-out.txt #verify thisdone
-done
-
- #exit environment
-
-# maybe we want to look at it to see if seqgen concatenated is performing correctly
-#rm *seqgen.out
-
-##TICR
-
-#quartet max cut is usually used in TICR for creating a most likely tree from a table of concordance factor values.
-#and then this is used as a backbone to create a network. 
-
-# TICR with Julia
 # extract Julia binaries tarball
-   tar -xzf julia-1.6.1-linux-x86_64.tar.gz
-   tar -xzf my-project-julia.tar.gz
-   tar -xzf TICR.tar.gz
+tar -xzf julia-1.6.1-linux-x86_64.tar.gz
+tar -xzf my-project-julia.tar.gz
 
 # add Julia binary to path
 export PATH=$_CONDOR_SCRATCH_DIR/julia-1.6.1/bin:$PATH
@@ -161,79 +83,64 @@ export PATH=$_CONDOR_SCRATCH_DIR/julia-1.6.1/bin:$PATH
 export JULIA_DEPOT_PATH=$_CONDOR_SCRATCH_DIR/my-project-julia
 
 # HyDe table
-
-for i in 15000 30000 60000 105000 255000 510000
-do
-HyDeOut=$1_$3_$4_${i}_HyDe-out.txt 
-HyDeOutName=$5_n$3_$4_${num_trial}_${i}_HyDe_Dstat_totlen.csv
+if [[ $boolHyde == 1 ]] 
+then
+echo "HyDe should run on ${seqgen_output}"
+HyDeOut=${gene_trees}_HyDe-out.txt
+HyDeOutName=${gene_trees}_HyDe_Dstat.csv
 julia --project=my-project-julia chtc_HyDe_Dstat_table.jl ${HyDeOut} ${true_network} ${significance} ${HyDeOutName}
-done
+fi
 
-for i in 50 100 150 200 500 1000 2000 5000 10000 50000 100000
-do
-HyDeOut=$1_$3_$4_${i}_HyDe-out.txt 
-HyDeOutName=$5_n$3_$4_${num_trial}_${i}_HyDe_Dstat_lenpertree.csv
-julia --project=my-project-julia chtc_HyDe_Dstat_table.jl ${HyDeOut} ${true_network} ${significance} ${HyDeOutName}
-done
 
-rm *HyDe-out*txt
+# If the input is a gene tree file, conduct TICR, MSC, D1/D2 tests
+if [[ $boolHyde == 0 ]]
+then
 
-# in order to use quartet max cut, it needs an input that is produced by the script
-   julia --project=my-project-julia chtc_cfTable.jl $1
+   timefile=${gene_trees}_TICR_time.txt
+   tar -xzf TICR.tar.gz
+   echo "running TICR and MSC on $1"
+   TICROut=${gene_trees}_ticr.csv
+   { time julia --project=my-project-julia chtc_TICR.jl ${gene_trees} ${true_network} ${TICROut} ; } 2> ${timefile}
 
-# requires quartet max cut [find-cut-Linux-64] in working directory; 
-#   ./TICR/scripts/get-pop-tree.pl $1.CFs.csv
-# this creates a file named $1.QMC.tre
+   ## MSCquartets
+   tar -xzf R402.tar.gz
+   tar -xzf packages.tar.gz
 
-# we run this with our true network, which will be converted to its major tree
-TICROut=$5_n$3_$4_${num_trial}_ticr.csv
-julia --project=my-project-julia chtc_TICR.jl $1 $5 ${TICROut}
+   # make sure the script will use your R installation, 
+   # and the working directory as its home location
+   export PATH=$PWD/R/bin:$PATH
+   export RHOME=$PWD/R
+   export R_LIBS=$PWD/packages
 
-# compares to the true network   
-# julia --project=my-project-julia chtc_TICR.jl $1 $5 ${TICROut}
+   timefile=${gene_trees}_MSC_time.txt
+   MSCOut=${gene_trees}_MSC.csv
+   #run MSC quartets analysis on input file (R)
+   { time Rscript chtc_MSCquartets.R ${gene_trees} ${MSCOut} ; } 2> ${timefile}
 
-#outputs: table of obsCF printed to file tableCF.txt, desciptive stat of input data printed to file summaryTreesQuartets.txt
+   # TICR, HyDe, and MSCQuartets produce three different output files, 
+   # which can then be used to build a comparison table, and compared to a true network file
 
-## MSCquartets
-
-tar -xzf R402.tar.gz
-tar -xzf packages.tar.gz
-
-# make sure the script will use your R installation, 
-# and the working directory as its home location
-export PATH=$PWD/R/bin:$PATH
-export RHOME=$PWD/R
-export R_LIBS=$PWD/packages
-
-MSCOut=$5_n$3_$4_${num_trial}_MSC.csv
- #run MSC quartets analysis on input file (R)
- Rscript chtc_MSCquartets.R $1 ${MSCOut}
-
-# TICR, HyDe, and MSCQuartets produce three different output files, 
-# which can then be used to build a comparison table, and compared to a true network file
-
-# expectedCFtable.jl
+   # timefile=${gene_trees}_D1_D2_time.txt
+   # d1_d2_output=${gene_trees}_D1_D2.csv
+   # { time python d1_d2.py ${gene_trees} ${map_file} ${d1_d2_output} ; } 2> ${timefile}
 
    export PATH=$_CONDOR_SCRATCH_DIR/julia-1.6.1/bin:$PATH
-# add Julia packages to DEPOT variable
    export JULIA_DEPOT_PATH=$_CONDOR_SCRATCH_DIR/my-project-julia
 
-   expected_quartets_file=n$3_$4_${num_trial}_expected.csv
-   julia --project=my-project-julia chtc_expected_cfTable.jl ${true_network} ${gene_trees} ${expected_quartets_file}
+   #expected_quartets_file=${gene_trees}_expected.csv
+   #julia --project=my-project-julia chtc_expected_cfTable.jl ${true_network} ${gene_trees} ${expected_quartets_file}
 
- TICRMSCSummaryOut=$5_n$3_$4_${num_trial}_TICR_MSC_summary.csv
- julia --project=my-project-julia chtc_TICRMSC_table.jl ${expected_quartets_file} ${TICROut} ${MSCOut} ${significance} ${true_network} ${TICRMSCSummaryOut}
-# output = ??
+   TICRMSCSummaryOut=${gene_trees}_TICR_MSC_summary.csv
+   julia --project=my-project-julia chtc_TICRMSC_table.jl ${TICROut} ${MSCOut} ${significance} ${true_network} ${TICRMSCSummaryOut}
 
+fi
+
+
+# removal of excess files
 rm *_MSC.csv
 rm *_ticr.csv
-
-# TICR table
-# MSCquartets table
-
+rm *.CFs.csv
 rm *_expected.csv
-rm *-gt*
 rm *astral*
-
-
-
+rm summaryTreesQuartets.txt
+rm tableCF.txt
