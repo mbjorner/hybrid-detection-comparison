@@ -1,0 +1,70 @@
+# chtc_d_tests.sub
+# conducts D, Dp, D3, D3v2, d1, d2.
+
+universe = vanilla
+
+#tempProcess = $(Process) + 1
+#newProcess = $INT(tempProcess)
+
+### inputs
+    folder_name=1a
+    num_taxa=4
+    map_name=n4h1map.txt
+    true_net=n4h1_0.5.net
+
+    #   folder_name=1b
+    #   num_taxa=4
+    #   map_name=n4h1map.txt
+    #   true_net=n4h1_introg.net
+    #
+    #   folder_name=1e
+    #   num_taxa=8
+    #   map_name=n8h3map.txt
+    #   true_net=n8h3.net
+    #
+    #   folder_name=1f
+    #   num_taxa=5
+    #   map_name=n5h2map.txt
+    #   true_net=n5h2.net
+    #
+    #   folder_name=n10
+    #   num_taxa=10
+    #   map_name=n10h2map.txt
+    #   true_net=n10h2.net
+    #
+    #   folder_name=n15
+    #   num_taxa=15
+    #   map_name=n15h3map.txt
+    #   true_net=n15h3.net
+
+log = logs/job_$(Cluster)_$(true_net)_$(num_trees).log
+error = logs/job_$(Cluster)_$(newProcess).err
+output = logs/job_$(Cluster)_$(newProcess).out
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+executable = chtc_d_d1_d2_d3.sh
+
+transfer_input_files = output/, directory/$(folder_name).txt, maps_hyde/$(map_name), input/$(folder_name)/$(process), julia-1.6.1-linux-x86_64.tar.gz,\
+    my-project-julia.tar.gz, chtc_TICR.jl, http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz,\
+    packages.tar.gz, chtc_MSCquartets.R, http://proxy.chtc.wisc.edu/SQUID/bjorner/HyDe.tar.gz,\
+    D3_D_combinations.py, d1_d2.py
+
+### arguments: input file, map, network,    e.g. n15orange-gt$(num_trees)-$(newProcess)-1.tre, $(newProcess)_astral.in
+arguments = $(process) $(map_name) $(num_taxa)
+
+# need for cpus, disk, and memory changes based on the size of the network and number of gene trees used. 
+# Typically, larger networks wtih more than 3000 gene trees require more
+# memory and disk space
+
+request_cpus = 2
+request_memory = 64GB
+request_disk = 64GB
+
+# number to run
+
+####### QUEUE PROCESSES FROM NUMBER OR TEXT FILE
+# queue 30
+
+queue process from directory/$(folder_name).txt

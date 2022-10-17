@@ -49,7 +49,8 @@ ENVDIR=$ENVNAME
       ;;
    esac
 
-seqgen_output=$1
+#  seqgen_output=$1 --- toggle line to run hyde
+seqgen_output=$2
 
 # where $3 is the number of taxa in the network OR the map file if the taxa names are non-integers
 boolHyde=0

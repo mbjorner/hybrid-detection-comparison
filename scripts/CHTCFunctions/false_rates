@@ -1,9 +1,0 @@
-# Marianne Bjorner
-# 24JAN2022
-
-# Plot TICR results, multiple hybridizations
-
-# This is used to plot the results of TICR, in which we compare the results
-# of the 30 TICR tests run for each gene tree.
-
-# It relies on the output of a summary method which creates a dataframe

@@ -7,7 +7,7 @@
 
  # will also contain a column for ghost lineages
 
-using QuartetNetworkGoodnessFit, DataFrames, CSV, PhyloNetworks, Statistics, Distributions
+using DataFrames, CSV, PhyloNetworks, Statistics, Distributions
 
 include("/Users/bjorner/GitHub/phylo-microbes/scripts/HelperFunctions/calcD.jl")
 
@@ -23,12 +23,19 @@ function calculate_WC(testReturnsHybrid, isTrueHybridID, isHybridInTriple)
 end
 
 function calcDsd_concatenated(abba, baba, bbaa, outgroup_position, nbootstrap=500)
-    if outgroup_position == 1 || outgroup_position == 2
-        #BBAA - BABA: use BBAA instead of ABBA
-        tempABBA = abba
+    if outgroup_position == 2
+        #AABB = ABBA, ABBA = BABA
+        baba = abba
         abba = bbaa
-        bbaa = tempABBA
+    elseif outgroup_position == 3
+        # AABB = ABBA, ABAB = BABA
+        abba = bbaa
+        #baba = baba
+    elseif outgroup_position == 1
+        #baba = baba
+        #abba = abba
     end
+
     n = abba+baba
     D = (abba-baba)/n
     p_abba = abba/n
@@ -42,11 +49,21 @@ function calcDsd_concatenated(abba, baba, bbaa, outgroup_position, nbootstrap=50
 
 function calcDpsd_concatenated(abba, abab, bbaa, outgroup_position, nbootstrap=500)
     # if outgroup position is 3, proceed normally. else, change whether we use abba or aabb. positions 1 and 2 give symmetric results
-    if outgroup_position == 1 || outgroup_position == 2
-        #BBAA - BABA: use BBAA instead of ABBA
+    if outgroup_position == 2
+        #AABB = ABBA, ABBA = BABA
+        tempBABA = abab
+        abab = abba
+        abba = bbaa
+        bbaa = tempBABA
+    elseif outgroup_position == 3
+        # AABB = ABBA, ABAB = BABA
         tempABBA = abba
         abba = bbaa
         bbaa = tempABBA
+        #baba = baba
+    elseif outgroup_position == 1
+        #baba = baba
+        #abba = abba
     end
     n = abba+abab+bbaa
     Dp = (abba-abab)/n
@@ -134,23 +151,34 @@ where d1-3, d2-3 can be computed by:
 
 d1-3
 sum over -> AABA AABB AABC CABC BACA BCAA ABCD ABBA BAAA ABBC 
+	AAAB		AABB	AABC	ABAA		ABAC	ABBA		ABBC	CABC		BCAA	ABCD
 d2-3
 sum over -> AABA AABB AABC CABC BACA BCAA ABCD ABAB ABAA ABAC 
+	AAAB	AABA		AABC		ABAB	ABAC	ABBA		ABBC	CABC	BACA		ABCD
+
 
 where AABA AABB AABC CABC BACA BCAA ABCD are equal between d1-3 and d2-3
 =#
-function calcD3fromHyDe(AABA,	AABB,	AABC,	ABAA,	ABAB,	ABAC,	ABBA,	BAAA,	ABBC,	CABC,	BACA,	BCAA,	ABCD, relative_outgroup, nbootstrap=500)
+function calcD3fromHyDe(AAAB, AABA,	AABB,	AABC,	ABAA,	ABAB,	ABAC,	ABBA,	BAAA,	ABBC,	CABC,	BACA,	BCAA,	ABCD, relative_outgroup, nbootstrap=500)
     # if relative outgroup is in position 3, proceed normally
-    dCommon = AABA + AABB + AABC + CABC + BACA + BCAA + ABCD 
-    d13 = dCommon + ABBA + BAAA + ABBC
-    d23 = dCommon + ABAB + ABAA + ABAC
-    d12 = ABAA + ABAB + ABAC + BAAA + ABBC + ABBA + CABC + BACA + BCAA + ABCD
+    d13, d23, d13, d12 = 0, 0, 0, 0
+
+    if relative_outgroup == 3
+        d13 = AAAB + AABB + AABC + ABAA + ABAC + ABBA + ABBC + CABC + BCAA + ABCD
+        d23 = AAAB + AABA + AABC + ABAB + ABAC + ABBA + ABBC + CABC + BACA + ABCD
+    elseif relative_outgroup == 2 #: d13 = d12, d23 = d23
+        d12 = AABA + AABB + AABC + ABAA + ABAB + ABAC +	CABC + BACA + BCAA + ABCD
+        d23 = AAAB + AABA + AABC + ABAB + ABAC + ABBA + ABBC + CABC + BACA + ABCD
+    elseif relative_outgroup == 1
+        d13 = AAAB + AABB + AABC + ABAA + ABAC + ABBA + ABBC + CABC + BCAA + ABCD
+        d12 = AABA + AABB + AABC + ABAA + ABAB + ABAC +	CABC + BACA + BCAA + ABCD
+    end
 
     # if relative outgroup is in position 1, compute D3 with d12 (== d23) and d13.
     if relative_outgroup == 1      
-        d23 = d12
+        d23 = d12 # so when +, there is an excess between 1 & 3, -, there is excess between 1 & 2
     elseif relative_outgroup == 2 # compute D3 with d12 and d23
-        d13 = d12
+        d13 = d12 # so when +, there is an excess between 1 & 2, -, there is excess between 2 & 3
     end
 
     n = d13 + d23
@@ -164,6 +192,35 @@ function calcD3fromHyDe(AABA,	AABB,	AABC,	ABAA,	ABAB,	ABAC,	ABBA,	BAAA,	ABBC,	CA
 
     return D3, z, pvalue
 end
+
+
+function makeUltrametric!(net::HybridNetwork)
+    ## Base case: does not change the network as it is already ultrametric
+    # if isUltrametric(net)
+    #    return
+    # end
+
+    ## network is not ultrametric
+    preorder!(net) # PhyloNetworks.directEdges!(net) ?? should we also direct the edges or is this unneeded
+    heights = PhyloNetworks.getHeights(net)
+    max_tip_height = findmax(heights)[1]
+    heights_dict = Dict([node.name => (heights[i], node.number, node) for (i,node) in enumerate(net.nodes_changed)])
+    labels = tipLabels(net)
+    for tip_name in labels
+        tip_height = heights_dict[tip_name][1]
+        node = heights_dict[tip_name][3]
+        if tip_height != max_tip_height # should there be floating point error accounted for?
+            # change the length of the external edge that the tip is attached to to make it same length
+            length_difference = max_tip_height - tip_height
+            edgeToChange = PhyloNetworks.getMajorParentEdge(node)
+            edgeToChange.length = edgeToChange.length + length_difference
+        end
+    end
+
+    return net
+
+end
+
 
 #=
 Returns Tip:Root / Hybrid:Root ratio assuming ultrametric tree with all nodes
@@ -252,7 +309,9 @@ both taxon 1 and taxon 2 (labels of leaves) are sister with the common outgroup 
 ensuring the distance in the network's major tree from tax1->out == tax2->out
 =#
 function isSisterSisterOutgroup(tax1,tax2,out,net::HybridNetwork)
+
     majorNet = majorTree(net)
+    majorNet = makeUltrametric!(majorNet)
     for l in tipLabels(net)
         if l ∉ [tax1, tax2, out]
             PhyloNetworks.deleteleaf!(majorNet,l,keeporiginalroot=true, simplify=true);
@@ -302,7 +361,7 @@ function analyzeHyDe_DStat(filepath, filename, netname, savefilepath)
     outgroup = split(outgroup,"n")[1]
     setsOfTriplets = size(HyDeOut,1)
 
-    column_names = [:P1, :Hybrid, :P2, :FP, :FN, :TP, :TN, :WC, :FP_bon, :FN_bon, :TP_bon, :TN_bon, :WC_bon, 
+    column_names = [:P1, :Hybrid, :P2, :HyDe_pvalue, :FP, :FN, :TP, :TN, :WC, :FP_bon, :FN_bon, :TP_bon, :TN_bon, :WC_bon, 
                     :hybridTripletExpected, :proposedHybridCorrect, :isGhostHybrid, :isGhostAtRoot, 
                     :isMultiHybrid, :lengthToHybridEdge, :tipToHybridRatio, 
                     :D, :D_z, :D_pvalue, :Dp, :Dp_z, :Dp_pvalue, :D3, :D3_z, :D3_pvalue, 
@@ -356,6 +415,7 @@ function analyzeHyDe_DStat(filepath, filename, netname, savefilepath)
         ABAB_site = HyDeOut[row,:ABAB]
         BBAA_site = HyDeOut[row,:AABB]
 
+        AAAB = HyDeOut[row,:AAAB]
         AABA = HyDeOut[row,:AABA]
         AABB = HyDeOut[row,:AABB]	
         AABC = HyDeOut[row,:AABC]	
@@ -369,7 +429,6 @@ function analyzeHyDe_DStat(filepath, filename, netname, savefilepath)
         BACA = HyDeOut[row,:BACA]	
         BCAA = HyDeOut[row,:BCAA]	
         ABCD = HyDeOut[row,:ABCD]
-
 
         # D-statistics should only be calculated where the correct topology is followed. 
         isCorrectDTopology_pos3 = isSisterSisterOutgroup(P1, Hybrid, P2, net)
@@ -387,8 +446,8 @@ function analyzeHyDe_DStat(filepath, filename, netname, savefilepath)
 
         D, D_z, D_pvalue = calcDsd_concatenated(ABBA_site, ABAB_site, BBAA_site, outgroup_position)
         Dp, Dp_z, Dp_pvalue = calcDpsd_concatenated(ABBA_site, ABAB_site, BBAA_site, outgroup_position)
-        D3, D3_z, D3_pvalue = calcD3fromHyDe(AABA,	AABB,	AABC,	ABAA,	ABAB,	ABAC,	ABBA,	BAAA,	ABBC,	CABC,	BACA,	BCAA,	ABCD, outgroup_position)
-  
+        D3, D3_z, D3_pvalue = calcD3fromHyDe(AAAB, AABA,	AABB,	AABC,	ABAA,	ABAB,	ABAC,	ABBA,	BAAA,	ABBC,	CABC,	BACA,	BCAA,	ABCD, outgroup_position)
+        HyDe_pval = HyDeOut[row,:Pvalue]
         # bootstrap option to calculate D, z-score, and p-value
         #=
         FP_D, FN_D, TP_D, TN_D = calculateD_FP_FN_TP_TN(D, hybridTripletExpected, 0.05 > D_pvalue, net)
@@ -412,7 +471,7 @@ function analyzeHyDe_DStat(filepath, filename, netname, savefilepath)
 
         isCorrectDTopology = outgroup_position
         
-        push!(df_results, [P1, Hybrid, P2, FP, FN, TP, TN, WC, FP_bon, FN_bon, TP_bon, TN_bon, WC_bon,
+        push!(df_results, [P1, Hybrid, P2, HyDe_pval, FP, FN, TP, TN, WC, FP_bon, FN_bon, TP_bon, TN_bon, WC_bon,
                            hybridTripletExpected, proposedHybridCorrect, isGhostHybridBool, 
                            isGhostHybridAtRootBool, isMultiHybrid, 
                            lengthToHybridEdge, tipToHybridRatio, 
@@ -550,7 +609,7 @@ function main(pathToFile::String, splitby, pathToSaveFile)
     #filename is set up with the format string(netname,"/-gt", num_gene_trees, "-1-1.tre...", HyDe_Dstat.csv
     filename = split(pathToFile, "/")[size(split(pathToFile, "/"), 1)]
     method, netname, netsize, gt_number, trial_number = extractMethodDetails(filename)
-    if contains(filename, "HyDe") && contains(filename, ".csv") !contains(filename, "time") && !contains(filename, "50h10")
+    if contains(filename, "-out.txt") && !contains(filename, ".csv") && !contains(filename, "time") && !contains(filename, "50h10")
         analyzeHyDe_DStat(pathToFile, filename, netname, pathToSaveFile)
     elseif contains(filename, "TICR_MSC") && contains(filename, ".csv") && !contains(filename, "time") && !contains(filename, "50h10")
         analyzeTICR_MSC(pathToFile, filename, netname, pathToSaveFile)
@@ -561,20 +620,27 @@ end
 
 
 netNameSplit="-"
-savePath="/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/ms_short_output_analyzed/" # will save in current directory unless otherwise specified
+savePath="/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/0915out/" # will save in current directory unless otherwise specified
 # conduct batch analysis from list of input files
-file_of_analyzed_files = "/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/analyzed_files.txt"
+file_of_analyzed_files = "/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/files_to_analyze.txt"
+pathToFile = ""
 list_output_files = Vector(CSV.File(file_of_analyzed_files, header=false))
 for file in list_output_files
-    main(file[1], netNameSplit, savePath)
+        main(string(pathToFile, file[1]), netNameSplit, savePath)
 end
+
+
+analyzedfiles = "/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/ms_outfiles_analyzed.txt"
+list_output_files = Vector(CSV.File(analyzedfiles, header=false))
+savePath = "/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/0915out.csv"
+summaryTableHyDe(list_output_files, savePath)
 
 
 #=
 Tally true positives and negatives from analyzed files creating a file in the form of :
 method     network    networksize    trial   true positives   true negatives   false positives  false negatives   wrong clades
 =#
-function summaryTableTICR(list_output_files)
+function summaryTableTICR(list_output_files, savePath)
     column_names = [:network_name, :net_size, :seq_length, :trial_num, 
     :FP, :FN, :TP, :TN, :FP_bon, :FN_bon, :TP_bon, :TN_bon, :TICR_pval]
     
@@ -605,7 +671,7 @@ function summaryTableTICR(list_output_files)
             end
         end
     end
-    CSV.write(string("summary_table_TICR_MSC08022022.csv"), summary_table)
+    CSV.write(string(savePath), summary_table)
 
 end
 
@@ -633,7 +699,83 @@ function extractMethodDetails(filename::AbstractString)
     return method, netname, netsize, gt_number, trial_number
 end
 
-function summaryTableHyDe(list_output_files) 
+function summaryTableHyDe(list_output_files, savePath) 
+
+    column_names = [:network_name, :net_size, :seq_length, :trial_num, 
+               :FP, :FN, :TP, :TN, :WC, :FP_bon, :FN_bon, :TP_bon, :TN_bon, :WC_bon,
+               :FP_D, :FN_D, :TP_D, :TN_D, :FP_Dbon, :FN_Dbon, :TP_Dbon, :TN_Dbon, 
+               :FP_Dp, :FN_Dp, :TP_Dp, :TN_Dp, :FP_Dpbon, :FN_Dpbon, :TP_Dpbon, :TN_Dpbon, 
+               :FP_D3, :FN_D3, :TP_D3, :TN_D3, :FP_D3bon, :FN_D3bon, :TP_D3bon, :TN_D3bon]
+    
+    summary_table = DataFrame(column_names .=> Ref([]))
+
+
+    for file in list_output_files
+        filename = split(file[1], "/")[size(split(file[1], "/"), 1)]
+        if contains(filename, "analyzed")
+            method, netname, netsize, gt_number, trial_number = extractMethodDetails(filename)
+            if contains(filename, "-out")
+            file = DataFrame(CSV.File(file[1]))
+    ### HyDe   
+    HyDe_FP = sum(file[!, :FP])
+    HyDe_FN = sum(file[!, :FN])
+    HyDe_TP = sum(file[!, :TP])
+    HyDe_TN = sum(file[!, :TN])
+    HyDe_WC = sum(file[!, :WC])
+
+    HyDe_FPbon = sum(file[!, :FP_bon])
+    HyDe_FNbon = sum(file[!, :FN_bon])
+    HyDe_TPbon = sum(file[!, :TP_bon])
+    HyDe_TNbon = sum(file[!, :TN_bon])
+    HyDe_WCbon = sum(file[!, :WC_bon])
+    ### D-statistic
+
+   # FP_D,FN_D,TP_D,TN_D,FP_Dbon,FN_Dbon,TP_Dbon,TN_Dbon,FP_Dp,FN_Dp,TP_Dp,TN_Dp,FP_Dpbon,FN_Dpbon,TP_Dpbon,TN_Dpbon,FP_D3,FN_D3,TP_D3,TN_D3,FP_D3bon,FN_D3bon,TP_D3bon,TN_D3bon
+    
+    Dstat_FP = sum(file[!, :FP_D])
+    Dstat_FN = sum(file[!, :FN_D])
+    Dstat_TP = sum(file[!, :TP_D])
+    Dstat_TN = sum(file[!, :TN_D])
+
+    Dstat_FPbon = sum(file[!, :FP_Dbon])
+    Dstat_FNbon = sum(file[!, :FN_Dbon])
+    Dstat_TPbon = sum(file[!, :TP_Dbon])
+    Dstat_TNbon = sum(file[!, :TN_Dbon])
+    ### Dp
+    Dp_FP = sum(file[!, :FP_Dp])
+    Dp_FN = sum(file[!, :FN_Dp])
+    Dp_TP = sum(file[!, :TP_Dp])
+    Dp_TN = sum(file[!, :TN_Dp])
+
+    Dp_FPbon = sum(file[!, :FP_Dpbon])
+    Dp_FNbon = sum(file[!, :FN_Dpbon])
+    Dp_TPbon = sum(file[!, :TP_Dpbon])
+    Dp_TNbon = sum(file[!, :TN_Dpbon])
+    ### D3
+    D3_FP = sum(file[!, :FP_D3])
+    D3_FN = sum(file[!, :FN_D3])
+    D3_TP = sum(file[!, :TP_D3])
+    D3_TN = sum(file[!, :TN_D3])
+
+    D3_FPbon = sum(file[!, :FP_D3bon])
+    D3_FNbon = sum(file[!, :FN_D3bon])
+    D3_TPbon = sum(file[!, :TP_D3bon])
+    D3_TNbon = sum(file[!, :TN_D3bon])
+
+    push!(summary_table, [netname, netsize, gt_number, trial_number,
+        HyDe_FP, HyDe_FN, HyDe_TP, HyDe_TN, HyDe_WC,
+        HyDe_FPbon, HyDe_FNbon, HyDe_TPbon, HyDe_TNbon, HyDe_WCbon,
+        Dstat_FP, Dstat_FN, Dstat_TP, Dstat_TN, Dstat_FPbon, Dstat_FNbon, Dstat_TPbon, Dstat_TNbon,
+        Dp_FP, Dp_FN, Dp_TP, Dp_TN, Dp_FPbon, Dp_FNbon, Dp_TPbon, Dp_TNbon,
+        D3_FP, D3_FN, D3_TP, D3_TN, D3_FPbon, D3_FNbon, D3_TPbon, D3_TNbon])
+        end
+    end
+end
+    
+    CSV.write(string(savePath), summary_table)
+end 
+
+function summaryTableHyDe(list_output_files, savePath, filterCondition, filterValue) 
 
     column_names = [:network_name, :net_size, :seq_length, :trial_num, 
                :FP, :FN, :TP, :TN, :WC, :FP_bon, :FN_bon, :TP_bon, :TN_bon, :WC_bon,
@@ -706,8 +848,101 @@ function summaryTableHyDe(list_output_files)
     end
 end
     
-    CSV.write(string("/Users/bjorner/github/phylo-microbes/scripts/CHTCFunctions/summary_table_HyDe_short.csv"), summary_table)
+    CSV.write(string(savePath), summary_table)
 end 
 
 # julia analyzeMethodOutputFile.jl 
 
+
+
+
+
+
+#=
+For the analysis of HyDe files that don't include a ground truth, 
+but only a network/specified tree to compare to 
+
+
+filepath = file of hyde output to analyze
+filename = desired filename for output to save
+netname = filepath to proposed species tree or network
+savefilepath = desired path to save output
+
+outgroup is unused
+=#
+
+function analyzeHyDe_DStat(filepath, filename, netname, savefilepath, outgroup) 
+    HyDeOut = DataFrame(CSV.File(filepath))
+    net = loadNet(netname)
+    outFile = string(savefilepath, filename, "_analyzed.csv")
+
+    sig05 = isSignificant(HyDeOut[!, :Pvalue], 0.05)
+    sig_bonferroni = isSignificantBonferroni(HyDeOut[!, :Pvalue], 0.05)
+    outgroup = split(filename,"h")[1]
+    outgroup = split(outgroup,"n")[1]
+    setsOfTriplets = size(HyDeOut,1)
+
+    column_names = [:P1, :Hybrid, :P2, :HyDe_pvalue,  
+                    :D, :D_z, :D_pvalue, :Dp, :Dp_z, :Dp_pvalue, :D3, :D3_z, :D3_pvalue, 
+                    :proposed_gamma, :isDtestTopology]
+
+    # add all names to dataframe as empty columns
+    df_results = DataFrame(column_names .=> Ref([]))
+
+    for row in 1:setsOfTriplets
+
+        net = readTopology(netname)
+        P1 = string(HyDeOut[row, :P1]);
+        Hybrid = string(HyDeOut[row, :Hybrid]);
+        P2 = string(HyDeOut[row, :P2]);
+        proposed_gamma = HyDeOut[row, :Gamma]
+        triplet = [P1,Hybrid,P2];
+        quad_includingoutgroup = [P1,Hybrid,P2,outgroup]
+
+        ABBA_site = round(HyDeOut[row,:ABBA])
+        ABAB_site = round(HyDeOut[row,:ABAB])
+        BBAA_site = round(HyDeOut[row,:AABB])
+
+        AAAB = round(HyDeOut[row,:AAAB])
+        AABA = round(HyDeOut[row,:AABA])
+        AABB = round(HyDeOut[row,:AABB])
+        AABC = round(HyDeOut[row,:AABC])	
+        ABAA = round(HyDeOut[row,:ABAA])	
+        ABAB = round(HyDeOut[row,:ABAB])	
+        ABAC = round(HyDeOut[row,:ABAC])	
+        ABBA = round(HyDeOut[row,:ABBA])	
+        BAAA = round(HyDeOut[row,:BAAA])	
+        ABBC = round(HyDeOut[row,:ABBC])	
+        CABC = round(HyDeOut[row,:CABC])	
+        BACA = round(HyDeOut[row,:BACA])	
+        BCAA = round(HyDeOut[row,:BCAA])	
+        ABCD = round(HyDeOut[row,:ABCD])
+
+        # D-statistics should only be calculated where the correct topology is followed. 
+        isCorrectDTopology_pos3 = isSisterSisterOutgroup(P1, Hybrid, P2, net)
+        isCorrectDTopology_pos1 = isSisterSisterOutgroup(P2, Hybrid, P1, net)
+
+        outgroup_position = 0
+        if isCorrectDTopology_pos1 
+            outgroup_position = 1
+        elseif isCorrectDTopology_pos3
+            outgroup_position = 3
+            # triplet is in the correct order
+        else
+            outgroup_position = 2
+        end
+
+        D, D_z, D_pvalue = calcDsd_concatenated(ABBA_site, ABAB_site, BBAA_site, outgroup_position)
+        Dp, Dp_z, Dp_pvalue = calcDpsd_concatenated(ABBA_site, ABAB_site, BBAA_site, outgroup_position)
+        D3, D3_z, D3_pvalue = calcD3fromHyDe(AAAB, AABA,	AABB,	AABC,	ABAA,	ABAB,	ABAC,	ABBA,	BAAA,	ABBC,	CABC,	BACA,	BCAA,	ABCD, outgroup_position)
+        HyDe_pval = HyDeOut[row,:Pvalue]
+  
+        isCorrectDTopology = outgroup_position
+        
+        push!(df_results, [P1, Hybrid, P2, HyDe_pval,  
+                           D, D_z, D_pvalue, Dp, Dp_z, Dp_pvalue, D3, D3_z, D3_pvalue, 
+                           proposed_gamma, isCorrectDTopology])
+    end
+
+    CSV.write(string(outFile), df_results)
+end
