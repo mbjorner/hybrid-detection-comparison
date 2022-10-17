@@ -14,7 +14,6 @@ using CSV, DataFrames
 
 # input must be in the form of:
 # 920m0.027s
-#
 function computeTimeInSeconds(string_time::AbstractString) 
     # hours_split = split(string_time, "h")
     # hours = hours_split[1]
@@ -91,7 +90,7 @@ function findTimes(filename::AbstractString)
 end
 
 """
-creates row to push to dataframe
+creates row of time to push to dataframe
 """
 function populateTimeRow(filename::AbstractString, pathToFile::String)
     cpu_time, wall_time = findTimes(string(pathToFile, filename))
@@ -99,11 +98,11 @@ function populateTimeRow(filename::AbstractString, pathToFile::String)
     return method, netname, netsize, gt_number, trial_number, wall_time, cpu_time
 end
 
-savePath="/Users/bjorner/GitHub/phylo-microbes/output/ms_out/" # will save in current directory unless otherwise specified
+savePath="/Users/bjorner/GitHub/phylo-microbes/output/ms_out/output08022022/" # will save in current directory unless otherwise specified
 outfile_name="time_summary.csv"
 
 # conduct batch analysis from list of input files, saved as a separate text file
-list_output_files = Vector(CSV.File("/Users/bjorner/GitHub/phylo-microbes/output/ms_out/files_to_analyze_time.txt", header=false))
+list_output_files = Vector(CSV.File("/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/files_to_analyze.txt", header=false))
 
 # create dataframe to save 
 column_names = [:method, :netname, :netsize, :gt_number, :trial_number, :wall_time, :cpu_time]
@@ -119,4 +118,14 @@ for file in list_output_files
     end
 end
 
+# missing values: replace nothing with missing: 
+for row in 1:size(df_results, 1)
+    for col in 1:size(df_results, 2)
+        if df_results[row,col] === nothing
+            df_results[row,col] = missing
+        end
+    end
+end
+
 CSV.write(string(savePath, outfile_name), df_results)
+
