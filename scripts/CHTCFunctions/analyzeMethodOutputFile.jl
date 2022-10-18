@@ -946,3 +946,26 @@ function analyzeHyDe_DStat(filepath, filename, netname, savefilepath, outgroup)
 
     CSV.write(string(outFile), df_results)
 end
+
+#=
+Remove taxon from trees
+- input tree, taxon to remove, ("Dufourea_novaeangliae")
+- output tree
+=#
+function removeAll(filename, leafname)
+
+    newfilename = string(filename, "_remove_", leafname, ".txt")
+    io = open(newfilename, "w")
+
+    f = readMultiTopology(filename)
+
+    for tree in f
+        treeString = writeTopology(tree)
+        if contains(treeString, leafname)
+            PhyloNetworks.deleteleaf!(tree, leafname, keeporiginalroot=true, simplify=true)
+        end
+        newTopologyString = writeTopology(tree)
+        write(io, string(newTopologyString,"\n"))
+    end
+
+end

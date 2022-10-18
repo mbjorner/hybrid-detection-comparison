@@ -7,6 +7,7 @@ Currently supported:
 - MSCquartets (R)
 - TICR (julia)
 - HyDe (python)
+- ABBA-BABA (as included in HyDe)
 
 ## HelperFunctions
 
@@ -29,8 +30,7 @@ contains summary tables for HyDe, MSCQuartets, and TICR functions, given their o
 
 contains functions to detect hybridization from gene trees or sequences, as well as simulating sequences.
 
-- doTicr.sh: (attempts) TICR - unfinished and a lil buggy.
-- ticr_julia.jl: redeption arc to doTicr.sh. actually does TICR.
+- ticr_julia.jl: TICR using the quartet-networks-goodness of fit julia package
 - seq-gen.sh: generates sequences
 - test_hyde.sh: runs HyDe
 - MSCQuartets folder: runs R-based MSCQuartets analysis

@@ -130,26 +130,29 @@ Attempting new approach with gene trees vs. sequences. Now following HyDe approa
 
 50000, 100000, 250000, 500000 
 
+# ran 0
 julia simulating-gene-trees.jl long_mix0 50000 24414561
 julia simulating-gene-trees.jl long_mix0 100000 53587631
 julia simulating-gene-trees.jl long_mix0 250000 762335942
 julia simulating-gene-trees.jl long_mix0 500000 181731251
 
-julia simulating-gene-trees.jl long_mix01 50000 47112053
-julia simulating-gene-trees.jl long_mix01 100000 21928191
-julia simulating-gene-trees.jl long_mix01 250000 8236186
-julia simulating-gene-trees.jl long_mix01 500000 1225867
+julia simulating-gene-trees.jl long_mix01 50000 47112053  x
+julia simulating-gene-trees.jl long_mix01 100000 21928191  x
+julia simulating-gene-trees.jl long_mix01 250000 8236186  x
+julia simulating-gene-trees.jl long_mix01 500000 1225867 
 
+# ran 02
 julia simulating-gene-trees.jl long_mix02 50000 342215791
 julia simulating-gene-trees.jl long_mix02 100000 198141484
 julia simulating-gene-trees.jl long_mix02 250000 84829164
 julia simulating-gene-trees.jl long_mix02 500000 47026095
 
-julia simulating-gene-trees.jl long_mix03 50000 75327069
-julia simulating-gene-trees.jl long_mix03 100000 51722091
-julia simulating-gene-trees.jl long_mix03 250000 475676116
-julia simulating-gene-trees.jl long_mix03 500000 72229109
+julia simulating-gene-trees.jl long_mix03 50000 75327069  x
+julia simulating-gene-trees.jl long_mix03 100000 51722091  x
+julia simulating-gene-trees.jl long_mix03 250000 475676116  x
+julia simulating-gene-trees.jl long_mix03 500000 72229109  
 
+# ran 04 >
 julia simulating-gene-trees.jl long_mix04 50000 81690291
 julia simulating-gene-trees.jl long_mix04 100000 52101735
 julia simulating-gene-trees.jl long_mix04 250000 06371274
