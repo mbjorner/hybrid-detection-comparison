@@ -47,10 +47,10 @@ RScript /phylo-microbes/scripts/HybridDetection/MSCquartets.R ${datafile} ${outp
 ```
 # where output from IQ-Tree 2 (GTR+G model) is used to compare to the rerooted consensus tree
 method_species_tree=Iq2_GTRG
-gene_trees=Iq2_GTRG_concatenated_gene_tree_files.tre
-species_tree
+gene_trees=/phylo-microbes/scripts/Bees_real_dataset/input_data/gene_tree_files.txt
+species_tree=/phylo-microbes/scripts/Bees_real_dataset/input_data/rerooted_iqtree.tre
 outfile=${method_species_tree}_TICR.csv
-julia /Users/bjorner/GitHub/phylo-microbes/scripts/HybridDetection/TICR.jl ${gene_trees} ${species_tree} ${outfile}
+julia /phylo-microbes/scripts/HybridDetection/TICR.jl ${gene_trees} ${species_tree} ${outfile}
 
 ```
 #### running HyDe
