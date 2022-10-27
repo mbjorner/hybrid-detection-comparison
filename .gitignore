@@ -2,6 +2,8 @@
 data/*
 *.in
 *.tre
+*.ipynb_checkpoints
+.ipynb_checkpoints/
 
 output/*
 
