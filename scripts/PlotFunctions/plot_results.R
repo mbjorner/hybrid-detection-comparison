@@ -10,8 +10,8 @@ library(grid)
 library(dplyr)
 library(lemon)
 
-hyde_d_d3_dp="/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/0915out.csv"
-ticr_msc = "/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/ms_outfiles_paper_ticr.csv"
+hyde_d_d3_dp="/Users/bjorner/GitHub/hybrid-detection-comparison/scripts/CHTCFunctions/0915out.csv"
+ticr_msc = "/Users/bjorner/GitHub/hybrid-detection-comparison/scripts/CHTCFunctions/ms_outfiles_paper_ticr.csv"
 
 error <- function(errRate) {
   return(sqrt((errRate * (1 - errRate)) / 30))
@@ -413,7 +413,7 @@ for (method_name in c("MSCquartets", "D-statistic", "D3", "Dp", "HyDe")) {
   plotN15_legend <- grid.arrange(plotN15, lg, nrow=2, heights=c(9,1))
   plotN25_legend <- grid.arrange(plotN25, lg, nrow=2, heights=c(5,1))
   
-  setwd("/Users/bjorner/GitHub/phylo-microbes")
+  setwd("/Users/bjorner/GitHub/hybrid-detection-comparison")
   if (significance == "alpha05") {
   ggsave(filename = "plotN4H1_05.png", plot = plotN4H1_legend, width = 8, height = 8)
   ggsave(filename = "plotN4H1N5H2N8H3_05.png", plot = plotN4H1N5H2N8H3_legend, width = 8, height = 6)

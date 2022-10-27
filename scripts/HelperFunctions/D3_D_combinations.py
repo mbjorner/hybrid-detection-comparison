@@ -7,7 +7,7 @@ https://github.com/mhibbins/D3_introgression/tree/master/analysis which was deve
 for D3 test.
 
 
-/Users/bjorner/GitHub/phylo-microbes/data/knownGT/multiNet/n10/n10-gt500000-22-1.tre
+/Users/bjorner/GitHub/hybrid-detection-comparison/data/knownGT/multiNet/n10/n10-gt500000-22-1.tre
 -- put through seqgen
 seqgen_out=${gene_trees}_seqgen.out
 THETA=0.01
@@ -15,7 +15,7 @@ THETA=0.01
         -f 0.15 0.35 0.15 0.35 -i 0.2 -a 5.0 -g 3 -q < ${gene_trees} > ${seqgen_out} 2> ${gene_trees}_seqgen.log
 
 Command then run e.g.
-D3_D_combinations.py /Users/bjorner/GitHub/n10-gt500000-22-1.tre_seqgen.out /Users/bjorner/GitHub/phylo-microbes/maps/n10h2map.txt
+D3_D_combinations.py /Users/bjorner/GitHub/n10-gt500000-22-1.tre_seqgen.out /Users/bjorner/GitHub/hybrid-detection-comparison/maps/n10h2map.txt
 
 
 For a given input file that is a sequence alignment, (ARG 1)

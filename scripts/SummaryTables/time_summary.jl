@@ -98,11 +98,11 @@ function populateTimeRow(filename::AbstractString, pathToFile::String)
     return method, netname, netsize, gt_number, trial_number, wall_time, cpu_time
 end
 
-savePath="/Users/bjorner/GitHub/phylo-microbes/output/ms_out/output08022022/" # will save in current directory unless otherwise specified
+savePath="/Users/bjorner/GitHub/hybrid-detection-comparison/output/ms_out/output08022022/" # will save in current directory unless otherwise specified
 outfile_name="time_summary.csv"
 
 # conduct batch analysis from list of input files, saved as a separate text file
-list_output_files = Vector(CSV.File("/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/files_to_analyze.txt", header=false))
+list_output_files = Vector(CSV.File("/Users/bjorner/GitHub/hybrid-detection-comparison/scripts/CHTCFunctions/files_to_analyze.txt", header=false))
 
 # create dataframe to save 
 column_names = [:method, :netname, :netsize, :gt_number, :trial_number, :wall_time, :cpu_time]

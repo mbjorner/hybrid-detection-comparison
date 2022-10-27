@@ -14,7 +14,7 @@ library(grid)
 library(dplyr)
 library(lemon)
 
-hyde_long_mix="/Users/bjorner/GitHub/phylo-microbes/data/HyDe_four_taxon/long_branches/long_mix052022_HyDe_DStat_pbonferronin4_long.csv"
+hyde_long_mix="/Users/bjorner/GitHub/hybrid-detection-comparison/data/HyDe_four_taxon/long_branches/long_mix052022_HyDe_DStat_pbonferronin4_long.csv"
 
 hyde_data = read.csv(hyde_long_mix)
 HyDe_counts <- hyde_data %>% group_by(network_name, gene_trees)
@@ -56,6 +56,6 @@ summary_HyDe["gene_trees"] = summary_HyDe["gene_trees"]/1000
   power_plot
 
   
-setwd("/Users/bjorner/GitHub/phylo-microbes/")
+setwd("/Users/bjorner/GitHub/hybrid-detection-comparison/")
 ggsave(filename = "power_calculations_hybridlambda_bonferroni.png", plot = power_plot, 
        width = 5, height = 5)

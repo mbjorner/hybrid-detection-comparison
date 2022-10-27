@@ -8,7 +8,7 @@ Each newick representation as given by ms output is read in
 
 Initially tested on :
 
-python d1_d2.py /Users/bjorner/GitHub/phylo-microbes/data/knownGT/multiNet/n6_n1000/1_astral.in /Users/bjorner/GitHub/phylo-microbes/maps/n6h1.txt
+python d1_d2.py /Users/bjorner/GitHub/hybrid-detection-comparison/data/knownGT/multiNet/n6_n1000/1_astral.in /Users/bjorner/GitHub/hybrid-detection-comparison/maps/n6h1.txt
 
 """
 

@@ -38,26 +38,26 @@ from file.
 #### running MSCquartets:
 ```
 # where datafile is the concatenated gene tree file
-datafile=/phylo-microbes/scripts/Bees_real_dataset/input_data/Iq2_GTRG_concatenated_gene_tree_files.tre
+datafile=/hybrid-detection-comparison/scripts/Bees_real_dataset/input_data/Iq2_GTRG_concatenated_gene_tree_files.tre
 output_name=${datafile}_MSCresults.csv
-RScript /phylo-microbes/scripts/HybridDetection/MSCquartets.R ${datafile} ${output_name}
+RScript /hybrid-detection-comparison/scripts/HybridDetection/MSCquartets.R ${datafile} ${output_name}
 ```
 
 #### running TICR:
 ```
 # where output from IQ-Tree 2 (GTR+G model) is used to compare to the rerooted consensus tree
 method_species_tree=Iq2_GTRG
-gene_trees=/phylo-microbes/scripts/Bees_real_dataset/input_data/Iq2_GTRG_concatenated_gene_tree_files.tre
-species_tree=/phylo-microbes/scripts/Bees_real_dataset/input_data/rerooted_iqtree.tre
+gene_trees=/hybrid-detection-comparison/scripts/Bees_real_dataset/input_data/Iq2_GTRG_concatenated_gene_tree_files.tre
+species_tree=/hybrid-detection-comparison/scripts/Bees_real_dataset/input_data/rerooted_iqtree.tre
 outfile=${method_species_tree}_TICR.csv
-julia /phylo-microbes/scripts/HybridDetection/TICR.jl ${gene_trees} ${species_tree} ${outfile}
+julia /hybrid-detection-comparison/scripts/HybridDetection/TICR.jl ${gene_trees} ${species_tree} ${outfile}
 
 ```
 #### running HyDe
 
 ```
-hyde_input=/phylo-microbes/scripts/Bees_real_dataset/80p_completeness_without_Dufourea.phylip
-map=/phylo-microbes/scripts/Bees_real_dataset/bee_map_without_Dufourea.txt
+hyde_input=/hybrid-detection-comparison/scripts/Bees_real_dataset/80p_completeness_without_Dufourea.phylip
+map=/hybrid-detection-comparison/scripts/Bees_real_dataset/bee_map_without_Dufourea.txt
 num_taxa=31
 outgroup=Lasioglossum_albipes
 length=576041
@@ -67,13 +67,13 @@ run_hyde.py -i ${hyde_input} -m ${map} -o ${outgroup} -n ${num_taxa} -t ${num_ta
 #### running Dp, D3, Patterson's D-Statistic
 
 ```
-# from the previous output of HyDe (output_HyDe), run following as contained in /phylo-microbes/scripts/SummaryTables/analyzeMethodOutputFile.jl/
+# from the previous output of HyDe (output_HyDe), run following as contained in /hybrid-detection-comparison/scripts/SummaryTables/analyzeMethodOutputFile.jl/
 
-output_HyDe=/phylo-microbes/scripts/Bees_real_dataset/results/bees_HyDe_outgroup_without_Dufourea_Lasioglossum_albipes-out.txt
-rerooted_tree=/phylo-microbes/scripts/Bees_real_dataset/input_data/rerooted_iqtree.tre
+output_HyDe=/hybrid-detection-comparison/scripts/Bees_real_dataset/results/bees_HyDe_outgroup_without_Dufourea_Lasioglossum_albipes-out.txt
+rerooted_tree=/hybrid-detection-comparison/scripts/Bees_real_dataset/input_data/rerooted_iqtree.tre
 
-analyzeHyDe_DStat(output_HyDe, "bees_outgroup_Lasioglossum_analyzed.csv", rerooted_tree, "/phylo-microbes/scripts/Bees_real_dataset/", "Lasioglossum_albipes") 
+analyzeHyDe_DStat(output_HyDe, "bees_outgroup_Lasioglossum_analyzed.csv", rerooted_tree, "/hybrid-detection-comparison/scripts/Bees_real_dataset/", "Lasioglossum_albipes") 
 ```
 
 #### plotting results
-found in `phylo-microbes/scripts/PlotFunctions/tree_plot.R`
+found in `hybrid-detection-comparison/scripts/PlotFunctions/tree_plot.R`

@@ -7,12 +7,12 @@ library(RColorBrewer)
 
 
 ## method ## network ## network size ## gene_trees/seq_length ## trial ## time_taken (seconds)
-setwd("~/GitHub/phylo-microbes/output/ms_out/output08022022/")
+setwd("~/GitHub/hybrid-detection-comparison/output/ms_out/output08022022/")
 
-# GitHub/phylo-microbes/output/ms_out/output08022022/time_summary.csv
+# GitHub/hybrid-detection-comparison/output/ms_out/output08022022/time_summary.csv
 
 timingresults <- "time_summary.csv"
-timingresults <- "/Users/bjorner/GitHub/phylo-microbes/output/ms_out/time_summary_ms_paper.csv"
+timingresults <- "/Users/bjorner/GitHub/hybrid-detection-comparison/output/ms_out/time_summary_ms_paper.csv"
 
 time_data <- read.csv(timingresults)
 time_grouped <- time_data %>% group_by(method, netsize, gt_number)
@@ -94,6 +94,6 @@ plot_times_legend <- grid.arrange(plot_times, arrangeGrob(lg_hyde, dummyplot,
                                   nrow=2, heights=c(5,1))
 
 plot_times_legend
-setwd("~/GitHub/phylo-microbes/")
+setwd("~/GitHub/hybrid-detection-comparison/")
 ggsave(filename = "plot_times_with_legend_test.png", plot = plot_times_legend, 
        width = 8, height = 3)

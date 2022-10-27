@@ -3,14 +3,14 @@
 # output: plots with counts of TICR p value less than some alpha by network
 # name and the number of gene trees
 
-setwd("~/GitHub/phylo-microbes/output/2022FEB15_output_alln10_n15")
+setwd("~/GitHub/hybrid-detection-comparison/output/2022FEB15_output_alln10_n15")
 
 #inputFile = "2022FEB15_TICR_results_withQMC.csv"
 
-setwd("~/GitHub/phylo-microbes/data/foranal20220517/")
+setwd("~/GitHub/hybrid-detection-comparison/data/foranal20220517/")
 inputFile = "n10n15_TICR_results_majorTree20220518.csv"
 
-inputFile = "/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/ms_outfiles_paper_ticr.csv"
+inputFile = "/Users/bjorner/GitHub/hybrid-detection-comparison/scripts/CHTCFunctions/ms_outfiles_paper_ticr.csv"
 # read input file as a dataframe for use with ggplot2;
 # ggplot2 must be installed w accompanying packages.
 
@@ -113,7 +113,7 @@ TICRplotalpha <- ggplot(data = summary_to_plot, mapping = aes(x = network_name, 
   theme(axis.text.x=element_text(size=10), axis.title=element_text(size=10));
 
 TICRplotalpha
-ggsave(filename = "/Users/bjorner/GitHub/phylo-microbes/TICR_plot_alpha05.png", plot = TICRplotalpha, width = 6, height = 3)
+ggsave(filename = "/Users/bjorner/GitHub/hybrid-detection-comparison/TICR_plot_alpha05.png", plot = TICRplotalpha, width = 6, height = 3)
 
 
 

@@ -9,7 +9,7 @@
 
 using DataFrames, CSV, PhyloNetworks, Statistics, Distributions
 
-include("/Users/bjorner/GitHub/phylo-microbes/scripts/HelperFunctions/calcD.jl")
+include("/Users/bjorner/GitHub/hybrid-detection-comparison/scripts/HelperFunctions/calcD.jl")
 
 net_directory = "/Users/bjorner/GitHub/ms_gene_trees/nets_newick/"
 
@@ -622,9 +622,9 @@ end
 
 
 netNameSplit="-"
-savePath="/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/0915out/" # will save in current directory unless otherwise specified
+savePath="/Users/bjorner/GitHub/hybrid-detection-comparison/scripts/CHTCFunctions/0915out/" # will save in current directory unless otherwise specified
 # conduct batch analysis from list of input files
-file_of_analyzed_files = "/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/files_to_analyze.txt"
+file_of_analyzed_files = "/Users/bjorner/GitHub/hybrid-detection-comparison/scripts/CHTCFunctions/files_to_analyze.txt"
 pathToFile = ""
 list_output_files = Vector(CSV.File(file_of_analyzed_files, header=false))
 for file in list_output_files
@@ -632,9 +632,9 @@ for file in list_output_files
 end
 
 
-analyzedfiles = "/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/ms_outfiles_analyzed.txt"
+analyzedfiles = "/Users/bjorner/GitHub/hybrid-detection-comparison/scripts/CHTCFunctions/ms_outfiles_analyzed.txt"
 list_output_files = Vector(CSV.File(analyzedfiles, header=false))
-savePath = "/Users/bjorner/GitHub/phylo-microbes/scripts/CHTCFunctions/0915out.csv"
+savePath = "/Users/bjorner/GitHub/hybrid-detection-comparison/scripts/CHTCFunctions/0915out.csv"
 summaryTableHyDe(list_output_files, savePath)
 
 
