@@ -21,8 +21,7 @@ function main()
 
     treeCF = readTrees2CF(geneTreeFile);
 
-    # thought that because of results of p-values giving high false negatives/false positives, this was indicative of this not working, but it seems
-    # the issue is really that p-values are representations of how well they are being represented by the QMC tree.
+    # p-values are representations of how well they are being represented by the QMC tree.
     # treeCF = DataFrame(CSV.File("tableCF.txt"));
     net = readTopology(tree);
     net = majorTree(net);
