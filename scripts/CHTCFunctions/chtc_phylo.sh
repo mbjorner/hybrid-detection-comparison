@@ -18,10 +18,6 @@ significance=0.05
 
 ###### HYDE / D-Statistic ######
 
-# unpack tarred files
-export WORKDIR=$PWD
-tar -xzf Seq-Gen-1.3.4.tar.gz
-cd $WORKDIR
 
 # replace env-name on the right hand side of this line with the name of your conda environment
 ENVNAME=HyDe
@@ -52,6 +48,8 @@ ENVDIR=$ENVNAME
 #  seqgen_output=$1 --- toggle line to run hyde
 seqgen_output=$2
 
+
+
 # where $3 is the number of taxa in the network OR the map file if the taxa names are non-integers
 boolHyde=0
 timefile=${seqgen_output}_HyDe_time.txt
@@ -71,8 +69,35 @@ do
    fi
 done
 
+# unpack tarred files
+export WORKDIR=$PWD
+tar -xzf Seq-Gen-1.3.4.tar.gz
+cd $WORKDIR
 
-#exit environment
+## create PHYLIP alignment
+./Seq-Gen-1.3.4/source/seq-gen -mHKY -s0.036 -f0.300414,0.191363,0.196748,0.311475 -n1 -l100 <  ${gene_trees} > alignment.sg.phy 2> seqgen_seed.log
+
+## save seed for recreation
+# grep "" seedms >> ${gt_filename}_seeds.txt
+cat ${gene_trees} | sed -n '2p' >> ${gene_trees}_seeds.txt
+grep "seed: " seqgen_seed.log >> ${gene_trees}_seeds.txt
+
+## create iqtree gene trees for comparison
+# unpack tarred files
+export WORKDIR=$PWD
+tar -xzf iqtree-1.6.12-Linux.tar.gz
+cd $WORKDIR
+
+# extract
+numtaxa=$3
+line_split=$((${numtaxa} + 1))
+split -d -l ${line_split} alignment.sg.phy physplit
+treename=${gene_trees}_iqtree.tre
+for i in physplit?*
+do
+   ./iqtree-1.6.12-Linux/bin/iqtree -m HKY85 -s $i
+   cat ${i}.treefile >> ${treename}
+done
 
 # extract Julia binaries tarball
 tar -xzf julia-1.6.1-linux-x86_64.tar.gz
@@ -82,6 +107,51 @@ tar -xzf my-project-julia.tar.gz
 export PATH=$_CONDOR_SCRATCH_DIR/julia-1.6.1/bin:$PATH
 # add Julia packages to DEPOT variable
 export JULIA_DEPOT_PATH=$_CONDOR_SCRATCH_DIR/my-project-julia
+
+tar -xzf TICR.tar.gz
+
+## run TICR using gene tree output and compare to major tree
+timefile=${gene_trees}_TICR_time.txt
+TICROut=${gene_trees}_ticr.csv
+{ time julia --project=my-project-julia chtc_TICR.jl ${gene_trees} ${true_network} ${TICROut} ; } 2> ${timefile}
+
+## run TICR using iqtree gene tree output and compare to major tree
+TICROut_iq=${treename}_ticr.csv
+{ time julia --project=my-project-julia chtc_TICR.jl ${treename} ${true_network} ${TICROut_iq} ; } >> ${timefile}
+    
+## MSCquartets
+tar -xzf R413.tar.gz
+tar -xzf packages.tar.gz
+
+# make sure the script will use your R installation, 
+# and the working directory as its home location
+export PATH=$PWD/R/bin:$PATH
+export RHOME=$PWD/R
+export R_LIBS=$PWD/packages
+
+# run MSCquartets using gene tree output
+timefile=${gene_trees}_MSC_time.txt
+MSCOut=${gene_trees}_MSC.csv
+{ time Rscript chtc_MSCquartets.R ${gene_trees} ${MSCOut} ; } 2> ${timefile}
+
+# run MSCquartets using iqtree gene tree output
+MSCOut_iq=${treename}_MSC.csv
+{ time Rscript chtc_MSCquartets.R ${treename} ${MSCOut_iq} ;} >> ${timefile}
+
+export PATH=$_CONDOR_SCRATCH_DIR/julia-1.6.1/bin:$PATH
+export JULIA_DEPOT_PATH=$_CONDOR_SCRATCH_DIR/my-project-julia
+
+#expected_quartets_file=${gene_trees}_expected.csv
+#julia --project=my-project-julia chtc_expected_cfTable.jl ${true_network} ${gene_trees} ${expected_quartets_file}
+
+TICRMSCSummaryOut=${gene_trees}_TICR_MSC_summary.csv
+julia --project=my-project-julia chtc_TICRMSC_table.jl ${TICROut} ${MSCOut} ${significance} ${true_network} ${TICRMSCSummaryOut}
+
+TICRMSCSummaryOut_iq=${treename}_TICR_MSC_summary.csv
+julia --project=my-project-julia chtc_TICRMSC_table.jl ${TICROut_iq} ${MSCOut_iq} ${significance} ${true_network} ${TICRMSCSummaryOut_iq}
+
+
+
 
 # HyDe table
 if [[ $boolHyde == 1 ]] 
@@ -93,53 +163,11 @@ julia --project=my-project-julia chtc_HyDe_Dstat_table.jl ${HyDeOut} ${true_netw
 fi
 
 
-# If the input is a gene tree file, conduct TICR, MSC, D1/D2 tests
-if [[ $boolHyde == 0 ]]
-then
-
-   timefile=${gene_trees}_TICR_time.txt
-   tar -xzf TICR.tar.gz
-   echo "running TICR and MSC on $1"
-   TICROut=${gene_trees}_ticr.csv
-   { time julia --project=my-project-julia chtc_TICR.jl ${gene_trees} ${true_network} ${TICROut} ; } 2> ${timefile}
-
-   ## MSCquartets
-   tar -xzf R402.tar.gz
-   tar -xzf packages.tar.gz
-
-   # make sure the script will use your R installation, 
-   # and the working directory as its home location
-   export PATH=$PWD/R/bin:$PATH
-   export RHOME=$PWD/R
-   export R_LIBS=$PWD/packages
-
-   timefile=${gene_trees}_MSC_time.txt
-   MSCOut=${gene_trees}_MSC.csv
-   #run MSC quartets analysis on input file (R)
-   { time Rscript chtc_MSCquartets.R ${gene_trees} ${MSCOut} ; } 2> ${timefile}
-
-   # TICR, HyDe, and MSCQuartets produce three different output files, 
-   # which can then be used to build a comparison table, and compared to a true network file
-
-   # timefile=${gene_trees}_D1_D2_time.txt
-   # d1_d2_output=${gene_trees}_D1_D2.csv
-   # { time python d1_d2.py ${gene_trees} ${map_file} ${d1_d2_output} ; } 2> ${timefile}
-
-   export PATH=$_CONDOR_SCRATCH_DIR/julia-1.6.1/bin:$PATH
-   export JULIA_DEPOT_PATH=$_CONDOR_SCRATCH_DIR/my-project-julia
-
-   #expected_quartets_file=${gene_trees}_expected.csv
-   #julia --project=my-project-julia chtc_expected_cfTable.jl ${true_network} ${gene_trees} ${expected_quartets_file}
-
-   TICRMSCSummaryOut=${gene_trees}_TICR_MSC_summary.csv
-   julia --project=my-project-julia chtc_TICRMSC_table.jl ${TICROut} ${MSCOut} ${significance} ${true_network} ${TICRMSCSummaryOut}
-
-fi
-
 
 # removal of excess files
 rm *_MSC.csv
 rm *_ticr.csv
+rm physplit*
 rm *.CFs.csv
 rm *_expected.csv
 rm *astral*

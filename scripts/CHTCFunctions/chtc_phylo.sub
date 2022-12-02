@@ -6,12 +6,15 @@ universe = vanilla
 #tempProcess = $(Process) + 1
 #newProcess = $INT(tempProcess)
 
-### inputs
+#################### INPUTS #####################
+# ONLY CHANGE THIS PORTION TO CONTROL WHAT RUNS #
 
-num_taxa=15
-map_name=n15h3map.txt
+num_taxa=25
+map_name=n25h3map.txt
 true_net=n15orange.net
 folder_name=n15orange
+
+#################################################
 
 log = logs/job_$(Cluster)_$(true_net)_$(num_trees).log
 error = logs/job_$(Cluster)_$(newProcess).err
@@ -27,10 +30,10 @@ executable = chtc_phylo.sh
 # input/all_hybs/n$(network)_n$(num_trees)/$(newProcess)_astral.in
 
 transfer_input_files = output/, nets_newick/$(true_net), directory/$(folder_name).txt, maps_hyde/$(map_name), input/$(process), julia-1.6.1-linux-x86_64.tar.gz,\
-    my-project-julia.tar.gz, chtc_TICR.jl, http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz,\
+    my-project-julia.tar.gz, chtc_TICR.jl, http://proxy.chtc.wisc.edu/SQUID/chtc/el8/R413.tar.gz,\
     packages.tar.gz, chtc_MSCquartets.R, http://proxy.chtc.wisc.edu/SQUID/bjorner/HyDe.tar.gz,\
     run_hyde.py, Seq-Gen-1.3.4.tar.gz, TICR.tar.gz, chtc_cfTable.jl, find-cut-Linux-64,\
-    d1_d2.py, D3_D_combinations.py, \
+    d1_d2.py, D3_D_combinations.py, iqtree-1.6.12-Linux.tar.gz,\
     chtc_expected_cfTable.jl, chtc_HyDe_Dstat_table.jl, chtc_TICRMSC_table.jl, seqgen2hyde.py
 
 ### arguments: input file, map, network,    e.g. n15orange-gt$(num_trees)-$(newProcess)-1.tre, $(newProcess)_astral.in
@@ -50,3 +53,4 @@ request_disk = 8GB
 # queue 30
 
 queue process from directory/$(folder_name).txt
+# queue n4h1_0.3.net-gt10000-7.tre
