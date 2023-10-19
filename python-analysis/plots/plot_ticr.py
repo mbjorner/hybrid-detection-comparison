@@ -51,7 +51,8 @@ def make_figure(df, output):
     ax11 = plt.subplot(gs[1,1])  # n15orange
 
     axs = [ax00, ax01, ax10, ax11]
-    nets = ["n10h2", "n10orange", "n15orange", "n15blue"]
+    nets = ["n10h1shallow", "n10h2", "n15h1shallow", "n15h1deep"]
+
     ngens = [30, 100, 300, 1000, 3000]
 
     for i, net in enumerate(nets):
