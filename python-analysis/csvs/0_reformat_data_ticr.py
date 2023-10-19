@@ -45,7 +45,7 @@ for net1, net2 in zip(nets1, nets2):
                     print(xdf)
                     sys.exit("Double check %s %s %d %d" % (net1, gtre, ngen, repl))
                 else:
-                    pval = xdf.TICR_pval.values[0]
+                    pval = float(xdf.TICR_pval.values[0])
                     row = {}
                     row["NET"] = net2
                     row["GTRE"] = gtre
@@ -64,7 +64,7 @@ df = pandas.DataFrame(rows, columns=cols)
 remove = []
 for net in nets2:
     print("Processing network %s" % net)
-    xdf = df[(df["NET"] == net) & (df["NGEN"] == ngen)]
+    xdf = df[(df["NET"] == net)]
     if numpy.sum(xdf.RNUL.values) == 0:
         sys.stdout.write("Removing network %s\n" % net)
         df = df[(df["NET"] != net)]
