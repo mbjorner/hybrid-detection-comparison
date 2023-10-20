@@ -52,7 +52,7 @@ for i in range(len(tableau20)):
     r, g, b = tableau20[i]
     tableau20[i] = (r / 255., g / 255., b / 255.)
 
-def make_figure(df, output):
+def make_figure(df, output, bon=False):
     fig = plt.figure(figsize=(7, 7))
     gs = gridspec.GridSpec(4,3)
     ax00 = plt.subplot(gs[0,0])
@@ -71,11 +71,17 @@ def make_figure(df, output):
     axs = [[ax00, ax01, ax02], 
            [ax10, ax11, ax12],
            [ax20, ax21, ax22],
+           [ax30, ax31, ax32],
            [ax30, ax31, ax32]]
     nets = ["n10h2", "n10h1shallow", "n10h1deep"]
-    mets = ["precision", "recall", "fpr"]
+    if bon:
+        mets = ["precision_bon", "recall_bon", "fpr_bon", "whr_bon"]
+        output = output + "_bon.pdf"
+    else:
+        mets = ["precision", "recall", "fpr", "whr"]
+        output = output + ".pdf"
     ngens = numpy.array([30, 100, 300, 1000, 3000, 10000])
-    ngens = ngens[:-1]
+    # ngens = ngens[:-1]
     mthds = ["MSCquartets-true", "MSCquartets-estimated", "HyDe", "D", "Dp", "D3"]
     names = ["MSCquartets (true gene trees)", "MSCquartets (estimated gene trees)", "HyDe", "D", "Dp", "D3"]
 
@@ -85,9 +91,9 @@ def make_figure(df, output):
             for k, mthd in enumerate(mthds):
                 xdf = df[(df["NET"] == net) & (df["MTHD"] == mthd)]
 
-                ys = xdf[met + "_mean"].values[:-1]
-                es = xdf[met + "_serr"].values[:1]
-                es = xdf[met + "_sdev"].values[:-1]
+                ys = xdf[met + "_mean"].values #[:-1]
+                es = xdf[met + "_sdev"].values #[:-1]
+                # es = xdf[met + "_serr"].values #[:-1]
 
                 keep = ~numpy.isnan(ys)
                 xs = ngens[keep]
@@ -99,7 +105,6 @@ def make_figure(df, output):
                             color=tableau20[k*2])
                 #ax.fill_between(xs, ys - es, ys + es, 
                 #                color=tableau20[2*k], alpha=0.25)
-         
 
             # Set labels
             if i == 0:
@@ -113,23 +118,52 @@ def make_figure(df, output):
                     transform=ax.transAxes)
 
             if (i == 0) and (j == 0):
-                ax.set_ylabel(r"Precision", fontsize=10)
+                ax.set_ylabel(r"Precision", fontsize=11)
             elif (i == 1) and (j == 0):
-                ax.set_ylabel(r"Recall", fontsize=10)
+                ax.set_ylabel(r"Recall", fontsize=11)
             elif (i == 2) and (j == 0):
-                ax.set_ylabel(r"FP Rate", fontsize=10)
+                ax.set_ylabel(r"FP Rate", fontsize=11)
+            elif (i == 3) and (j == 0):
+                ax.set_ylabel(r"Wrong Hybrid Rate", fontsize=11)
 
             if i > 2:
-                ax.set_xlabel("\# of Loci", fontsize=10)
+                ax.set_xlabel("\# of Loci", fontsize=11)
 
-            #xticks = [x + 0.125 for x in xs1]
-            #ax.set_xticks(xticks, [str(x) for x in ngens])
+            if bon:
+                if i == 0:
+                    ytick_min = 0.0
+                    ytick_max = 1.0
+                    diff = ytick_max - ytick_min
+                    ymin = ytick_min - diff * 0.05
+                    ymax = ytick_max + diff * 0.05
+                    yticks = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+                elif i == 1:
+                    ytick_min = 0.0
+                    ytick_max = 0.8
+                    diff = ytick_max - ytick_min
+                    ymin = ytick_min - diff * 0.05
+                    ymax = ytick_max + diff * 0.05
+                    yticks = [0.0, 0.2, 0.4, 0.6, 0.8]
+                elif i == 2:
+                    ytick_min = 0.0
+                    ytick_max = 0.15
+                    diff = ytick_max - ytick_min
+                    ymin = ytick_min - diff * 0.05
+                    ymax = ytick_max + diff * 0.05
+                    yticks = [0.0, 0.05, 0.1, 0.15]
+                elif i == 3:
+                    ytick_min = 0.0
+                    ytick_max = 0.6
+                    diff = ytick_max - ytick_min
+                    ymin = ytick_min - diff * 0.05
+                    ymax = ytick_max + diff * 0.05
+                    yticks = [0.0, 0.2, 0.4, 0.6]
 
-            #yticks = [0, 20, 40, 60, 80, 100]
-            #ax.set_ylim(0, 100)
-            #ax.set_yticks(yticks)
-            #ax.tick_params(axis='x', labelsize=9)
-            #ax.tick_params(axis='y', labelsize=9)
+                ax.set_ylim(ymin, ymax)
+                ax.set_yticks(yticks)
+                ax.set_xticks([0, 3000, 10000])
+                ax.tick_params(axis='x', labelsize=9)
+                ax.tick_params(axis='y', labelsize=9)
 
             # Set plot axis parameters
             ax.tick_params(axis=u'both', which=u'both',length=0) # removes tiny ticks
@@ -140,7 +174,6 @@ def make_figure(df, output):
 
     # Add legend at bottom
     gs.tight_layout(fig, rect=[0, 0.1, 1, 1])
-    #fig.suptitle("Percent replicates TICR correctly rejects major tree", fontsize=12)
 
     hs = []
     for k in range(len(mthds)):
@@ -155,7 +188,7 @@ def make_figure(df, output):
               ncol=3,
               fontsize=10.5,
               loc='lower center',
-              bbox_to_anchor=(0.5, -1, 0, 1))
+              bbox_to_anchor=(0.4, -1.25, 0, 1))
 
     ## Save plot
     ##gs.tight_layout(fig, rect=[0, 0, 1, 1])
@@ -163,4 +196,6 @@ def make_figure(df, output):
 
 # Read and plot data
 df = pandas.read_csv("../csvs/data-other-summary.csv")
-make_figure(df, "figure-other-n10h.pdf")
+make_figure(df, "figure-other-n10h", bon=False)
+make_figure(df, "figure-other-n10h", bon=True)
+
