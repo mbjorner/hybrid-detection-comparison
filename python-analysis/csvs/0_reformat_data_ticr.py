@@ -2,6 +2,7 @@ import numpy
 import pandas
 import sys
 
+
 df_true = pandas.read_csv("MSC.csv")
 df_esti = pandas.read_csv("MSC_iqtree.csv")
 
@@ -10,22 +11,19 @@ nets1 = ["n4h1_0.1", "n4h1_0.2", "n4h1_0.3", "n4h1_0.4", "n4h1_0.5", "n4h1_0",
          "n10h2", "n10orange", "n10red",
          "n15blue", "n15h3", "n15orange", "n15red",
          "n25h5"]
-
 nets2 = ["n4h1_0.1", "n4h1_0.2", "n4h1_0.3", "n4h1_0.4", "n4h1_0.5", "n4h1_0",
          "n4h1_introg", "n5h2", "n8h3",
          "n10h2", "n10h1shallow", "n10h1deep",
          "n15h1deep", "n15h3", "n15h1shallow", "n15h1intermediate",
          "n25h5"]
-
 ngens = [30, 100, 300, 1000, 3000]
 gtres = ["true", "estimated"]
 
 
+# Check and combine data
 cols = ["NET", "NGEN", "REPL", "GTRE", "PVAL", "RNUL"]
 rows = []
 
-
-# Check data
 for net1, net2 in zip(nets1, nets2):
     for gtre in gtres:
         if gtre == "true":
@@ -60,6 +58,7 @@ for net1, net2 in zip(nets1, nets2):
 
 df = pandas.DataFrame(rows, columns=cols)
 
+
 # Remove networks with nothing in true and estimated gene trees
 remove = []
 for net in nets2:
@@ -68,6 +67,7 @@ for net in nets2:
     if numpy.sum(xdf.RNUL.values) == 0:
         sys.stdout.write("Removing network %s\n" % net)
         df = df[(df["NET"] != net)]
+
 
 # Convert to proportions
 cols = ["NET", "NGEN", "GTRE", "PROP"]
@@ -92,5 +92,8 @@ for net in nets:
             rows.append(row)
 
 df = pandas.DataFrame(rows, columns=cols)
+
+
+# Save data frame
 df.to_csv("data-ticr.csv",
           sep=',', na_rep="NA",header=True, index=False)

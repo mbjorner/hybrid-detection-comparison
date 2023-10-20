@@ -13,24 +13,24 @@ nets1 = ["n4h1_0.1", "n4h1_0.2", "n4h1_0.3", "n4h1_0.4", "n4h1_0.5", "n4h1_0",
          "n10h2", "n10orange", "n10red",
          "n15blue", "n15h3", "n15orange", "n15red",
          "n25h5"]
-
 nets2 = ["n4h1_0.1", "n4h1_0.2", "n4h1_0.3", "n4h1_0.4", "n4h1_0.5", "n4h1_0",
          "n4h1_introg", "n5h2", "n8h3",
          "n10h2", "n10h1shallow", "n10h1deep",
          "n15h1deep", "n15h3", "n15h1shallow", "n15h1intermediate",
          "n25h5"]
-
 ngens = [30, 100, 300, 1000, 3000, 10000]
 gtres = ["true", "estimated"]
+mthds = ["MSCquartets-true", "MSCquartets-estimated", "HyDe", "D", "Dp", "D3"]
 
-cols = ["NET", "NGEN", "REPL", "GTRE", "MTHD",
+# Check and combine data
+cols = ["NET", "NGEN", "REPL", "MTHD",
         "precision", "precision_bon",
         "recall", "recall_bon",
         "fpr", "fpr_bon",
-        "wrong_hybrid"]
+        "wrong_hybrid", "wrong_hybrid_bon"]
 rows = []
 
-# Check data
+# MSCquartets
 for net1, net2 in zip(nets1, nets2):
     for gtre in gtres:
         if gtre == "true":
@@ -48,17 +48,17 @@ for net1, net2 in zip(nets1, nets2):
             for repl in repls:
                 row = {}
                 row["NET"] = net2
-                row["GTRE"] = gtre
                 row["NGEN"] = ngen
                 row["REPL"] = repl
-                row["MTHD"] = "MSCquartets"
-                row["precision"] = "NA"
-                row["precision_bon"] = "NA"
-                row["recall"] = "NA"
-                row["recall_bon"] = "NA"
-                row["fpr"] = "NA"
-                row["fpr_bon"] = "NA"
-                row["wrong_hybrid"] = "NA"
+                row["MTHD"] = "MSCquartets-" + gtre
+                row["precision"] = numpy.nan
+                row["precision_bon"] = numpy.nan
+                row["recall"] = numpy.nan
+                row["recall_bon"] = numpy.nan
+                row["fpr"] = numpy.nan
+                row["fpr_bon"] = numpy.nan
+                row["wrong_hybrid"] = numpy.nan
+                row["wrong_hybrid_bon"] = numpy.nan
 
                 if ngen == 10000:
                     rows.append(row)
@@ -96,7 +96,7 @@ for net1, net2 in zip(nets1, nets2):
 
                 rows.append(row)
 
-
+# Site-based methods data
 for net1, net2 in zip(nets1, nets2):
     for ngen in ngens:
         repls = [rep for rep in range(1, 31)]
@@ -115,22 +115,20 @@ for net1, net2 in zip(nets1, nets2):
                     print(xdf)
                     sys.exit("Double check site methods - %s %d %d" % (net1, ngen, repl))
 
-                for mthd in ["HyDe", "D", "Dp", "D3"]:
+                for mthd in mthds[2:]:
                     row = {}
                     row["NET"] = net2
-                    row["GTRE"] = gtre
                     row["NGEN"] = ngen
                     row["REPL"] = repl
                     row["MTHD"] = mthd
-                    row["TP"] = "NA"
-                    row["FP"] = "NA"
-                    row["precision"] = "NA"
-                    row["precision_bon"] = "NA"
-                    row["recall"] = "NA"
-                    row["recall_bon"] = "NA"
-                    row["fpr"] = "NA"
-                    row["fpr_bon"] = "NA"
-                    row["wrong_hybrid"] = "NA"
+                    row["precision"] = numpy.nan
+                    row["precision_bon"] = numpy.nan
+                    row["recall"] = numpy.nan
+                    row["recall_bon"] = numpy.nan
+                    row["fpr"] = numpy.nan
+                    row["fpr_bon"] = numpy.nan
+                    row["wrong_hybrid"] = numpy.nan
+                    row["wrong_hybrid_bon"] = numpy.nan
 
                     TP = xdf["TP_" + mthd].values[0]
                     TN = xdf["TN_" + mthd].values[0]
@@ -158,11 +156,14 @@ for net1, net2 in zip(nets1, nets2):
                         # ToDo: I am not sure how to make this a rate...
                         # WC_HyDe
                         # WC_HyDebon
+                        # row["wrong_hybrid"] = numpy.nan
+                        # row["wrong_hybrid_bon"] = numpy.nan
                         pass
 
                     rows.append(row)
 
 df = pandas.DataFrame(rows, columns=cols)
+
+# Save data frame
 df.to_csv("data-other.csv",
           sep=',', na_rep="NA",header=True, index=False)
-
