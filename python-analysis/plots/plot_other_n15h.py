@@ -53,27 +53,30 @@ for i in range(len(tableau20)):
     tableau20[i] = (r / 255., g / 255., b / 255.)
 
 def make_figure(df, output, bon=False):
-    fig = plt.figure(figsize=(6, 6))
-    gs = gridspec.GridSpec(4,3)
+    fig = plt.figure(figsize=(8, 6))
+    gs = gridspec.GridSpec(4,4)
     ax00 = plt.subplot(gs[0,0])
     ax01 = plt.subplot(gs[0,1])
     ax02 = plt.subplot(gs[0,2])
+    ax03 = plt.subplot(gs[0,3])
     ax10 = plt.subplot(gs[1,0])
     ax11 = plt.subplot(gs[1,1])
     ax12 = plt.subplot(gs[1,2])
+    ax13 = plt.subplot(gs[1,3])
     ax20 = plt.subplot(gs[2,0])
     ax21 = plt.subplot(gs[2,1])
     ax22 = plt.subplot(gs[2,2])
+    ax23 = plt.subplot(gs[2,3])
     ax30 = plt.subplot(gs[3,0])
     ax31 = plt.subplot(gs[3,1])
     ax32 = plt.subplot(gs[3,2])
+    ax33 = plt.subplot(gs[3,3])
 
-    axs = [[ax00, ax01, ax02], 
-           [ax10, ax11, ax12],
-           [ax20, ax21, ax22],
-           [ax30, ax31, ax32],
-           [ax30, ax31, ax32]]
-    nets = ["n10h2", "n10h1shallow", "n10h1deep"]
+    axs = [[ax00, ax01, ax02, ax03], 
+           [ax10, ax11, ax12, ax13],
+           [ax20, ax21, ax22, ax23],
+           [ax30, ax31, ax32, ax33]]
+    nets = ["n15h3", "n15h1shallow", "n15h1intermediate", "n15h1deep"]
     if bon:
         mets = ["precision_bon", "recall_bon", "fpr_bon", "whr_bon"]
         output = output + "_bon.pdf"
@@ -139,18 +142,18 @@ def make_figure(df, output, bon=False):
                     yticks = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
                 elif i == 1:
                     ytick_min = 0.0
-                    ytick_max = 0.8
+                    ytick_max = 0.6
                     diff = ytick_max - ytick_min
                     ymin = ytick_min - diff * 0.05
                     ymax = ytick_max + diff * 0.05
-                    yticks = [0.0, 0.2, 0.4, 0.6, 0.8]
+                    yticks = [0.0, 0.2, 0.4, 0.6]
                 elif i == 2:
                     ytick_min = 0.0
-                    ytick_max = 0.15
+                    ytick_max = 0.3
                     diff = ytick_max - ytick_min
                     ymin = ytick_min - diff * 0.05
                     ymax = ytick_max + diff * 0.05
-                    yticks = [0.0, 0.05, 0.1, 0.15]
+                    yticks = [0.0, 0.1, 0.2, 0.3]
                 elif i == 3:
                     ytick_min = 0.0
                     ytick_max = 0.6
@@ -188,7 +191,7 @@ def make_figure(df, output, bon=False):
               ncol=3,
               fontsize=10.5,
               loc='lower center',
-              bbox_to_anchor=(0.4, -1.5, 0, 1))
+              bbox_to_anchor=(1.1, -1.5, 0, 1))
 
     ## Save plot
     ##gs.tight_layout(fig, rect=[0, 0, 1, 1])
@@ -196,6 +199,6 @@ def make_figure(df, output, bon=False):
 
 # Read and plot data
 df = pandas.read_csv("../csvs/data-other-summary.csv")
-make_figure(df, "figure-other-n10h", bon=False)
-make_figure(df, "figure-other-n10h", bon=True)
+make_figure(df, "figure-other-n15h", bon=False)
+make_figure(df, "figure-other-n15h", bon=True)
 
