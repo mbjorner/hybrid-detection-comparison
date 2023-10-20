@@ -27,7 +27,7 @@ cols = ["NET", "NGEN", "REPL", "MTHD",
         "precision", "precision_bon",
         "recall", "recall_bon",
         "fpr", "fpr_bon",
-        "wrong_hybrid", "wrong_hybrid_bon"]
+        "whr", "whr_bon"]
 rows = []
 
 # MSCquartets
@@ -57,8 +57,8 @@ for net1, net2 in zip(nets1, nets2):
                 row["recall_bon"] = numpy.nan
                 row["fpr"] = numpy.nan
                 row["fpr_bon"] = numpy.nan
-                row["wrong_hybrid"] = numpy.nan
-                row["wrong_hybrid_bon"] = numpy.nan
+                row["whr"] = numpy.nan
+                row["wrh_bon"] = numpy.nan
 
                 if ngen == 10000:
                     rows.append(row)
@@ -153,12 +153,13 @@ for net1, net2 in zip(nets1, nets2):
                         row["fpr_bon"] = FP_bon / (FP_bon + TN_bon)
 
                     if mthd == "HyDe":
-                        # ToDo: I am not sure how to make this a rate...
-                        # WC_HyDe
-                        # WC_HyDebon
-                        # row["wrong_hybrid"] = numpy.nan
-                        # row["wrong_hybrid_bon"] = numpy.nan
-                        pass
+                        WH = xdf["WC_" + mthd].values[0]
+                        WH_bon = xdf["WC_" + mthd + "bon"].values[0]
+
+                        if (WH + TP + FP) > 0:
+                            row["whr"] = WH / (WH + TP + FP)
+                        if (WH_bon + TP_bon + FP_bon) > 0:
+                            row["whr_bon"] = WH_bon / (WH_bon + TP_bon + FP_bon)
 
                     rows.append(row)
 
