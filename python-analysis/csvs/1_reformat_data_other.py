@@ -84,11 +84,11 @@ for net1, net2 in zip(nets1, nets2):
                 if TP + FP > 0:
                     row["precision"] =  TP / (TP + FP)
                 if TP_bon + FP_bon > 0:
-                    row["precision"] =  TP_bon / (TP_bon + FP_bon)
+                    row["precision_bon"] =  TP_bon / (TP_bon + FP_bon)
                 if TP + FN > 0:
                     row["recall"] = TP / (TP + FN)
                 if TP_bon + FN_bon > 0:
-                    row["recall"] = TP_bon / (TP_bon + FN_bon)
+                    row["recall_bon"] = TP_bon / (TP_bon + FN_bon)
                 if FP + TN > 0:
                     row["fpr"] = FP / (FP + TN)
                 if FP_bon + TN_bon > 0:
@@ -142,11 +142,11 @@ for net1, net2 in zip(nets1, nets2):
                     if TP + FP > 0:
                         row["precision"] =  TP / (TP + FP)
                     if TP_bon + FP_bon > 0:
-                        row["precision"] =  TP_bon / (TP_bon + FP_bon)
+                        row["precision_bon"] =  TP_bon / (TP_bon + FP_bon)
                     if TP + FN > 0:
                         row["recall"] = TP / (TP + FN)
                     if TP_bon + FN_bon > 0:
-                        row["recall"] = TP_bon / (TP_bon + FN_bon)
+                        row["recall_bon"] = TP_bon / (TP_bon + FN_bon)
                     if FP + TN > 0:
                         row["fpr"] = FP / (FP + TN)
                     if FP_bon + TN_bon > 0:
