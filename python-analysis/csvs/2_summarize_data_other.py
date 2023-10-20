@@ -54,7 +54,7 @@ for net in nets:
                     row[mtrc + "_serr"] = numpy.std(data) / numpy.sqrt(notna)
                 row[mtrc + "_notna"] = notna
 
-                rows.append(row)
+            rows.append(row)
 
 df = pandas.DataFrame(rows, columns=cols)
 
