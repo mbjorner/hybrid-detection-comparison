@@ -13,8 +13,8 @@ nets = ["n4h1_0.1", "n4h1_0.2", "n4h1_0.3", "n4h1_0.4", "n4h1_0.5", "n4h1_0",
         "n25h5"]
 ngens = [30, 100, 300, 1000, 3000, 10000]
 mthds = ["MSCquartets-true", "MSCquartets-estimated", "HyDe", "D", "Dp", "D3"]
-mtrcs = ["precision", "precision_bon", 
-         "recall", "recall_bon", 
+mtrcs = ["precision", "precision_bon",
+         "recall", "recall_bon",
          "fpr", "fpr_bon",
          "whr", "whr_bon"]
 
@@ -27,7 +27,7 @@ cols = ["NET", "NGEN", "MTHD",
         "fpr_mean", "fpr_sdev", "fpr_serr", "fpr_notna",
         "fpr_bon_mean", "fpr_bon_sdev", "fpr_bon_serr", "fpr_bon_notna",
         "whr_mean", "whr_sdev", "whr_serr", "whr_notna", 
-        "whr_bon_mean", "whr_bon_sdev", "whr_bon_serr", "whr_bon_notna",]
+        "whr_bon_mean", "whr_bon_sdev", "whr_bon_serr", "whr_bon_notna"]
 rows = []
 
 for net in nets:

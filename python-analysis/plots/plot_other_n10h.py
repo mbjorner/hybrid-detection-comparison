@@ -83,7 +83,7 @@ def make_figure(df, output, bon=False):
     ngens = numpy.array([30, 100, 300, 1000, 3000, 10000])
     # ngens = ngens[:-1]
     mthds = ["MSCquartets-true", "MSCquartets-estimated", "HyDe", "D", "Dp", "D3"]
-    names = ["MSCquartets (true gene trees)", "MSCquartets (estimated gene trees)", "HyDe", "D", "Dp", "D3"]
+    names = ["MSCquartets (true trees)", "MSCquartets (estimated trees)", "HyDe", "D", "Dp", "D3"]
 
     for i, met in enumerate(mets):
         for j, net in enumerate(nets):
@@ -100,7 +100,7 @@ def make_figure(df, output, bon=False):
                 ys = ys[keep]
                 es = es[keep]
 
-                ax.plot(xs, ys, '.-', color=tableau20[k*2])
+                ax.plot(xs, ys, '.-', color=tableau20[k*2], lw=1)
                 ax.errorbar(xs, ys, yerr=es,
                             color=tableau20[k*2])
                 #ax.fill_between(xs, ys - es, ys + es, 
@@ -133,37 +133,45 @@ def make_figure(df, output, bon=False):
                 if i == 0:
                     ytick_min = 0.0
                     ytick_max = 1.0
-                    diff = ytick_max - ytick_min
-                    ymin = ytick_min - diff * 0.05
-                    ymax = ytick_max + diff * 0.05
                     yticks = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
                 elif i == 1:
                     ytick_min = 0.0
                     ytick_max = 0.8
-                    diff = ytick_max - ytick_min
-                    ymin = ytick_min - diff * 0.05
-                    ymax = ytick_max + diff * 0.05
                     yticks = [0.0, 0.2, 0.4, 0.6, 0.8]
                 elif i == 2:
                     ytick_min = 0.0
                     ytick_max = 0.15
-                    diff = ytick_max - ytick_min
-                    ymin = ytick_min - diff * 0.05
-                    ymax = ytick_max + diff * 0.05
                     yticks = [0.0, 0.05, 0.1, 0.15]
                 elif i == 3:
                     ytick_min = 0.0
                     ytick_max = 0.6
-                    diff = ytick_max - ytick_min
-                    ymin = ytick_min - diff * 0.05
-                    ymax = ytick_max + diff * 0.05
                     yticks = [0.0, 0.2, 0.4, 0.6]
+            else:
+                if i == 0:
+                    ytick_min = 0.0
+                    ytick_max = 1.0
+                    yticks = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+                elif i == 1:
+                    ytick_min = 0.0
+                    ytick_max = 0.8
+                    yticks = [0.0, 0.2, 0.4, 0.6, 0.8]
+                elif i == 2:
+                    ytick_min = 0.0
+                    ytick_max = 0.15
+                    yticks = [0.0, 0.1, 0.2, 0.3]
+                elif i == 3:
+                    ytick_min = 0.0
+                    ytick_max = 0.5
+                    yticks = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
 
-                ax.set_ylim(ymin, ymax)
-                ax.set_yticks(yticks)
-                ax.set_xticks([0, 3000, 10000])
-                ax.tick_params(axis='x', labelsize=9)
-                ax.tick_params(axis='y', labelsize=9)
+            diff = ytick_max - ytick_min
+            ymin = ytick_min - diff * 0.05
+            ymax = ytick_max + diff * 0.05
+            ax.set_ylim(ymin, ymax)
+            ax.set_yticks(yticks)
+            ax.set_xticks([0, 3000, 10000])
+            ax.tick_params(axis='x', labelsize=9)
+            ax.tick_params(axis='y', labelsize=9)
 
             # Set plot axis parameters
             ax.tick_params(axis=u'both', which=u'both',length=0) # removes tiny ticks
@@ -186,9 +194,23 @@ def make_figure(df, output, bon=False):
     ax31.legend(hs, names,
               frameon=False,
               ncol=3,
-              fontsize=10.5,
+              fontsize=10,
               loc='lower center',
-              bbox_to_anchor=(0.4, -1.5, 0, 1))
+              bbox_to_anchor=(0.95, -1.55, 0, 1))
+
+    if bon:
+        label = r"$\alpha < 0.05$ / \# of tests"
+    else:
+        label = r"$\alpha < 0.05$"
+
+    ax30.text(-0.3, -1.0, r"Threshold:", fontsize=10, 
+              horizontalalignment='left',
+              verticalalignment='center',
+              transform=ax30.transAxes)
+    ax30.text(-0.3, -1.2, label, fontsize=10, 
+              horizontalalignment='left',
+              verticalalignment='center',
+              transform=ax30.transAxes)
 
     ## Save plot
     ##gs.tight_layout(fig, rect=[0, 0, 1, 1])
